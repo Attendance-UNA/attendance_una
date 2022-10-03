@@ -13,10 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/uploadPerson', function(){
+Route::post('person/import', 'uploadPersonController@importFile');
+
+Route::get('/person', function(){
     return view('person.uploadPersonView');
 });
-
 
 Route::get('/', function () {
     return view('welcome');

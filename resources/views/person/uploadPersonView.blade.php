@@ -7,10 +7,17 @@
     <title>Cargar Lista de Invitados</title>
 </head>
 <body>
-
-    <form action="">
+    <form method="post" action="{{ url('person/import') }}" enctype="multipart/form-data">
+        @csrf
+        @method('POST')
         <label for="xlsx_person">Lista de personas invitadas a la actividad(*.xlsx):</label>
         <input type="file" name="xlsx_person" id="xlsx_person"/>
+        @if ($errors->has('xlsx_person'))
+        <div class="alert alert-danger">
+            <span class="text-danger">{{ $errors->first('xlsx_person') }}</span>
+        </div>
+        @endif
+        <button type="submit">Subir archivo</button>
     </form>
     
 </body>
