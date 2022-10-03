@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Logic;
+
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx as ReaderXlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
+class XlsxLogic{
+
+    private $reader;
+    private $path;
+    private $spreadsheet;
+    private $sheet;
+    private $workSheetInfo;
+
+    public function __construct($path) {
+        $this->reader = new ReaderXlsx();
+        $this->spreadsheet = $reader->load($path);
+        $this->sheet = $spreadsheet->getActiveSheet();
+        $this->workSheetInfo = $reader->listWorksheetInfo($path);
+    }
+
+    public function readContent($rowBegin, $columns){
+        $data = [];
+        for ($i = $rowBegin; $i < XlsxLogic::getTotalRows(); $i++){
+            for ($j = 0; $j < count($columns); $j++){
+                $data[$i][$j] = $this->sheet->getCell("{$columns[$j]}{$i}");
+                /*new Person([
+                    "id" => $sheet->getCell("A{$i}")->getValue(),
+                    "name" => $sheet->getCell("B{$i}")->getValue(),
+                    "firstLastName" => $sheet->getCell("C{$i}")->getValue(),
+                    "secondLastName" => $sheet->getCell("D{$i}")->getValue(),
+                    "email" => $sheet->getCell("E{$i}")->getValue(),
+                    "category" => $sheet->getCell("F{$i}")->getValue(),
+                    "subcategories" => $sheet->getCell("G{$i}")->getValue(),
+                    "status" => $sheet->getCell("H{$i}")->getValue(),
+                    "institutionalCard" => $sheet->getCell("I{$i}")->getValue(),
+                    "phone" => $sheet->getCell("J{$i}")->getValue()
+                ]);  */
+            } 
+        }
+        return $data;
+    }
+
+    public function getTotalRows(){
+        return $this->workSheetInfo[0]['totalRows'];
+    }
+
+    public function getworkSheetInfo(){
+        return $this->workSheetInfo;
+    }
+
+    public function getReader(){
+        return $this->reader;
+    }
+
+    public function getSpreadsheet(){
+        return $this->spreadsheet;
+    }
+
+    public function getPath(){
+        return $this->path;
+    }
+
+    public function getSheet(){
+        return $this->sheet;
+    }
+
+    public function setworkSheetInfo($workSheetInfo){
+        $this->workSheetInfo = $workSheetInfo;
+    }
+
+    public function setReader($reader){
+        $this->reader = $reader;
+    }
+
+    public function setSpreadsheet($spreadsheet){
+        $this->spreadsheet = $spreadsheet;
+    }
+
+    public function setPath($path){
+        $this->path = $path;
+    }
+
+    public function setSheet($sheet){
+        $this->sheet = $sheet;
+    }
+}
