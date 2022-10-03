@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/uploadPerson', function(){
+    return view('person.uploadPersonView');
+});
+
+
 Route::get('/', function () {
     return view('welcome');
 });
