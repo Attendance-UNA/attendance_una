@@ -10,7 +10,7 @@ class example_controller extends Controller
     //
 
     public function index(){
-        return "Me cago en la remilputa";
+        return "Me - en la -";
     }
 
     public function saludo(){

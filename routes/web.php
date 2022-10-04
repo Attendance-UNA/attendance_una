@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('/scancode', function () {
+    return view('scanningQR');
+});
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
