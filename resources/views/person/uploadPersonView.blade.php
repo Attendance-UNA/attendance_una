@@ -12,9 +12,14 @@
         @method('POST')
         <label for="xlsx_person">Lista de personas invitadas a la actividad(*.xlsx):</label>
         <input type="file" name="xlsx_person" id="xlsx_person"/>
-        @if ($errors->has('xlsx_person'))
+        @if (session('error'))
         <div class="alert alert-danger">
-            <span class="text-danger">{{ $errors->first('xlsx_person') }}</span>
+            <span class="text-danger">{{ session('error') }}</span>
+        </div>
+        @endif
+        @if (session('success'))
+        <div class="alert alert-success">
+            <span class="text-success">{{ session('success') }}</span>
         </div>
         @endif
         <button type="submit">Subir archivo</button>
