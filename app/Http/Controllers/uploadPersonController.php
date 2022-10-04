@@ -36,18 +36,6 @@ class uploadPersonController extends Controller
         }else{
             $message = 'Por favor seleccione un archivo con extensión *.xlsx';
         }
-
-        
-
-        /*$validatedData = $request->validate([
-            "xlsx_person" => 'required|mimes:xlsx'
-        ],
-        [
-            "xlsx_person.required" => 'Por favor seleccione un archivo',
-            "xlsx_person.mimes" => 'Por favor seleccione un archivo con extensión *.xlsx'
-        ]);*/
-       
-
         return redirect('/person')->with($messageType, $message);
     }
 }
