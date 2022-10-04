@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use App\Logic\XlsxLogic;
 use App\Models\Person;
 use Illuminate\Http\Request;
@@ -22,8 +23,26 @@ class uploadPersonController extends Controller
                 if ($xlsxLogic->checkRequiredColumns(3, ["A","B","C","D","E","F","G","H"]) == true){
                     if ($xlsxLogic->checkDuplicateColumn(3, "A") == true){
                         $people = $xlsxLogic->toPersonArray($data);
-                        $messageType = 'success';
-                        $message = '¡Datos importados correctamente!';
+                        DB::transaction(function(){
+                            foreach ($people as $person){
+                                DB::insert(
+                                    'insert into users (id, name, first_lastname, second_lastname, email, category, subcategory, status, institutional_card, phone) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                                    [$person->id,
+                                    $person->name,
+                                    $person->firstLastName,
+                                    $person->secondLastName,
+                                    $person->email,
+                                    $person->category,
+                                    $person->subcategories,
+                                    $person->status,
+                                    $person->institutionalCard,
+                                    $person->phone
+                                    ]
+                                );
+                            }    
+                            $messageType = 'success';
+                            $message = '¡Datos importados correctamente!';
+                        });
                     }else{
                         $message = "¡Existen datos duplicados en la columna de A del archivo xlsx, por favor revise y corrija los campos!";
                     }
@@ -34,7 +53,7 @@ class uploadPersonController extends Controller
                 $message = '¡Archivo *.xlsx vacío, por favor llene con los datos de manera correcta y con la estructura establecida!';
             } 
         }else{
-            $message = 'Por favor seleccione un archivo con extensión *.xlsx';
+            $message = '¡Por favor seleccione un archivo con extensión *.xlsx!';
         }
         return redirect('/person')->with($messageType, $message);
     }
