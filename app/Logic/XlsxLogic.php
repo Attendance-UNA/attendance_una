@@ -45,6 +45,17 @@ class XlsxLogic{
         return true;
     }
 
+    public function checkDuplicateColumn($rowBegin, $column){
+        for ($i = $rowBegin; $i <= XlsxLogic::getTotalRows(); $i++){
+            for ($j = $i + 1; $j <= XlsxLogic::getTotalRows(); $j++){
+                if (strcasecmp($this->sheet->getCell("{$column}{$i}")->getValue(), $this->sheet->getCell("{$column}{$j}")->getValue()) == 0 && $i != $j){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public function toPersonArray($data){
         $people = [];
         for ($i = 0; $i < count($data); $i++){

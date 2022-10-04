@@ -18,12 +18,15 @@ class uploadPersonController extends Controller
             $people = [];
             $xlsxLogic = new XlsxLogic($path);
             $data = $xlsxLogic->readContent(3, ["A","B","C","D","E","F","G","H","I","J"]);
-    
             if ($xlsxLogic->getTotalRows() > 2){
                 if ($xlsxLogic->checkRequiredColumns(3, ["A","B","C","D","E","F","G","H"]) == true){
-                    $people = $xlsxLogic->toPersonArray($data);
-                    $messageType = 'success';
-                    $message = '¡Datos importados correctamente!';
+                    if ($xlsxLogic->checkDuplicateColumn(3, "A") == true){
+                        $people = $xlsxLogic->toPersonArray($data);
+                        $messageType = 'success';
+                        $message = '¡Datos importados correctamente!';
+                    }else{
+                        $message = "¡Existen datos duplicados en la columna de A del archivo xlsx, por favor revise y corrija los campos!";
+                    }
                 }else{
                     $message = '¡Algunos campos son obligatorios, por favor llene los campos de manera correcta y asegurese de no tener filas en blanco!';
                 }
