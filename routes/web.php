@@ -1,6 +1,7 @@
 <?php
-use App\Http\Controllers\example_controller;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\SubcategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::resource('subcategories', SubcategoryController::class);
