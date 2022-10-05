@@ -17,32 +17,54 @@ class uploadPersonController extends Controller
         if (!is_null($request->file('xlsx_person')) && $request->file('xlsx_person')->getClientOriginalExtension() == 'xlsx'){
             $path = $request->file('xlsx_person')->getRealPath();
             $people = [];
+            $countInsert = 0;
+            $countUpdate = 0;
             $xlsxLogic = new XlsxLogic($path);
             $data = $xlsxLogic->readContent(3, ["A","B","C","D","E","F","G","H","I","J"]);
             if ($xlsxLogic->getTotalRows() > 2){
                 if ($xlsxLogic->checkRequiredColumns(3, ["A","B","C","D","E","F","G","H"]) == true){
                     if ($xlsxLogic->checkDuplicateColumn(3, "A") == true){
                         $people = $xlsxLogic->toPersonArray($data);
-                        DB::transaction(function(){
+                        DB::beginTransaction();
+                        try{
                             foreach ($people as $person){
-                                DB::insert(
-                                    'insert into users (id, name, first_lastname, second_lastname, email, category, subcategory, status, institutional_card, phone) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                                    [$person->id,
-                                    $person->name,
-                                    $person->firstLastName,
-                                    $person->secondLastName,
-                                    $person->email,
-                                    $person->category,
-                                    $person->subcategories,
-                                    $person->status,
-                                    $person->institutionalCard,
-                                    $person->phone
-                                    ]
-                                );
-                            }    
+                                if (is_null(DB::table('tbperson')->find($person->id))){//if it is null it will insert the person
+                                    DB::insert(
+                                        'insert into tbperson (id, name, first_lastname, second_lastname, email, category, subcategory, status, institutional_card, phone) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                                        [$person->id,
+                                        $person->name,
+                                        $person->firstLastName,
+                                        $person->secondLastName,
+                                        $person->email,
+                                        $person->category,
+                                        $person->subcategories,
+                                        $person->status,
+                                        (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
+                                        (!is_null($person->phone))?$person->phone:'N/A'
+                                        ]
+                                    );
+                                    $countInsert++;
+                                }else{//else it will update the person
+                                    DB::table('tbperson')
+                                        ->where('id', $person->id)
+                                        ->update([
+                                            'email' => $person->email, 
+                                            'category' => $person->category, 
+                                            'subcategory' => $person->subcategories, 
+                                            'status' => $person->status,
+                                            'institutional_card' => (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
+                                            'phone' => (!is_null($person->phone))?$person->phone:'N/A'
+                                        ]);
+                                    $countUpdate++;
+                                }
+                            }
+                            DB::commit();
                             $messageType = 'success';
-                            $message = '¡Datos importados correctamente!';
-                        });
+                            $message = "¡Datos importados correctamente! Resultados: {$countInsert} datos registrados y {$countUpdate} datos existentes actualizados";
+                        }catch(Exception $e){
+                            DB::rollBack();
+                            $message = "¡No se pudo realizar la transacción, por favor intente de nuevo! Error: " . $e->getMessage();
+                        }
                     }else{
                         $message = "¡Existen datos duplicados en la columna de A del archivo xlsx, por favor revise y corrija los campos!";
                     }
