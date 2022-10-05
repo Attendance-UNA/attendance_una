@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use App\Logic\XlsxLogic;
+use App\Logic\QRCodeLogic;
 use App\Models\Person;
 use Illuminate\Http\Request;
 use Excel;
@@ -25,6 +26,8 @@ class uploadPersonController extends Controller
                 if ($xlsxLogic->checkRequiredColumns(3, ["A","B","C","D","E","F","G","H"]) == true){
                     if ($xlsxLogic->checkDuplicateColumn(3, "A") == true){
                         $people = $xlsxLogic->toPersonArray($data);
+                        $qrLogic = new QRCodeLogic();
+                        $qrLogic->writeQrCodeInDoc($people);
                         DB::beginTransaction();
                         try{
                             foreach ($people as $person){
@@ -78,5 +81,10 @@ class uploadPersonController extends Controller
             $message = '¡Por favor seleccione un archivo con extensión *.xlsx!';
         }
         return redirect('/person')->with($messageType, $message);
+    }
+
+    public function testQRCode(){
+        $qrLogic = new QRCodeLogic();
+        return $qrLogic->generateQRCode("402530326");
     }
 }
