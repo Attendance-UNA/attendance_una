@@ -1,6 +1,6 @@
 <?php
-use App\Http\Controllers\example_controller;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SubcategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +13,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+<<<<<<< Updated upstream
+=======
+Route::get('/scancode', function () {
+    return view('scanningQR');
+});
+
+>>>>>>> Stashed changes
 Route::get('/', function () {
     return view('welcome');
+});
+
+/**
+ *  Section routes by subcategory
+ */
+Route::post('subcategory/data', [SubcategoryController::class, 'insertSubcategory']);
+
+Route::get('/subcategory', function () {
+    return view('subcategory.modalSubcategoryView');
 });
