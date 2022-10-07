@@ -64,7 +64,7 @@ class uploadPersonController extends Controller
                             DB::commit();
                             $messageType = 'success';
                             $message = "¡Datos importados correctamente! Resultados: {$countInsert} datos registrados y {$countUpdate} datos existentes actualizados";
-                        }catch(Exception $e){
+                        }catch(\Exception $e){
                             DB::rollBack();
                             $message = "¡No se pudo realizar la transacción, por favor intente de nuevo! Error: " . $e->getMessage();
                         }
