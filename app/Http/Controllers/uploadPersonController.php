@@ -80,7 +80,7 @@ class uploadPersonController extends Controller
         }else{
             $message = '¡Por favor seleccione un archivo con extensión *.xlsx!';
         }
-        return redirect('/person')->with($messageType, $message);
+        return ["messageType"=>$messageType, "message"=>$message];
     }
 
     public function testQRCode(){
