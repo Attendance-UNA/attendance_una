@@ -18,6 +18,7 @@ class uploadPersonController extends Controller
         if (!is_null($request->file('xlsx_person')) && $request->file('xlsx_person')->getClientOriginalExtension() == 'xlsx'){
             $path = $request->file('xlsx_person')->getRealPath();
             $people = [];
+            $fileName = "";
             $countInsert = 0;
             $countUpdate = 0;
             $xlsxLogic = new XlsxLogic($path);
@@ -27,7 +28,6 @@ class uploadPersonController extends Controller
                     if ($xlsxLogic->checkDuplicateColumn(3, "A") == true){
                         $people = $xlsxLogic->toPersonArray($data);
                         $qrLogic = new QRCodeLogic();
-                        $qrLogic->writeQrCodeInDoc($people);
                         DB::beginTransaction();
                         try{
                             foreach ($people as $person){
@@ -64,6 +64,7 @@ class uploadPersonController extends Controller
                             DB::commit();
                             $messageType = 'success';
                             $message = "¡Datos importados correctamente! Resultados: {$countInsert} datos registrados y {$countUpdate} datos existentes actualizados";
+                            $fileName = $qrLogic->writeQrCodeInDoc($people);
                         }catch(\Exception $e){
                             DB::rollBack();
                             $message = "¡No se pudo realizar la transacción, por favor intente de nuevo! Error: " . $e->getMessage();
@@ -80,7 +81,7 @@ class uploadPersonController extends Controller
         }else{
             $message = '¡Por favor seleccione un archivo con extensión *.xlsx!';
         }
-        return ["messageType"=>$messageType, "message"=>$message];
+        return ["messageType"=>$messageType, "message"=>$message, "fileName"=>(strcmp($messageType, "success") == 0)?$fileName:null];
     }
 
     public function testQRCode(){

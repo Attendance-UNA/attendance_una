@@ -34,7 +34,8 @@ class QRCodeLogic{
         }
         
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-        $objWriter->save('test.docx');
-
+        $fileName = "attendace".date("Y") . date("m") . date("d") . ".docx";
+        $objWriter->save('files/docx/'. $fileName);
+        return $fileName;
     }
 }

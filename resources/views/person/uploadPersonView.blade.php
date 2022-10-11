@@ -50,7 +50,11 @@
                             <button type="button" class="btn-close" onclick="dimissAlert('div-success')" aria-label="Close"></button>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-success">Subir archivo</button>
+                    <div class="d-none" id="div-download">
+                        <a href="" id="download_ref">Descargar códigos QR (*.docx)</a>
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-success">Importar Datos</button>
                 </form>
                 <!-- end form section -->
             </div>

@@ -1,6 +1,7 @@
 function submitData(){
     dimissAlert('div-error');
     dimissAlert('div-success');
+    dimissAlert('div-download');
     var file = document.getElementById("xlsx_person").files[0];
     if (file == null || file.name.split(".")[1] != "xlsx"){
         showMessage("div-error", "error-message", "¡Por favor seleccione un archivo con extensión *.xlsx!");
@@ -19,6 +20,8 @@ function submitData(){
                 var response = JSON.parse(httpRequest.responseText);
                 if (response.messageType == "success"){
                     showMessage("div-success", "success-message", response.message);
+                    document.getElementById('download_ref').href = "files/docx/" + response.fileName;
+                    document.getElementById('div-download').classList.remove('d-none');
                 }else{
                     showMessage("div-error", "error-message", response.message);
                 }
