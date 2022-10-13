@@ -13,6 +13,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::post('person/import', 'uploadPersonController@importFile');
+Route::get('person/qrcode', 'uploadPersonController@testQRCode');
+
+Route::get('/person', function(){
+    return view('person.uploadPersonView');
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
