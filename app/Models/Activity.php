@@ -17,7 +17,7 @@ class Activity extends Model
         "endTime",
         "description",
         "manager",
-        "guests"
+        "subcategories"
     ];
 
 }
