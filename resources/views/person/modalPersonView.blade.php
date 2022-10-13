@@ -8,7 +8,7 @@
         <link href="css/loading.css" rel="stylesheet">
         <script src="js/person/personFunctions.js"></script>
     </head>
-    <body>
+    <body onload="initializerImportPersonModal()">
         <!-- Charge loading animation form -->
         <div class="d-none" id="div-loading">
             <div class="loading" id="loading">
@@ -42,7 +42,7 @@
                                     <!--Card body-->
                                     <div class="card-body">
                                         <!--form section-->
-                                        <form  onsubmit="return submitDataPerson()">
+                                        <form  id="formUploadPerson" onsubmit="return submitDataPerson()">
                                             <!-- file-->
                                             <div class="mb-3">
                                                 <label for="xlsx_person" class="form-label">Lista de personas invitadas a la actividad(*.xlsx):</label>

@@ -6,29 +6,43 @@ function submitDataPerson(){
     }
     else{ 
         const data = new FormData();
+        var urlAction = 'person/import';
         data.append("xlsx_person", file);
-        httpRequest = new XMLHttpRequest();
-        httpRequest.open('POST', 'person/import', true);
-        httpRequest.setRequestHeader('X-CSRF-TOKEN', document.getElementsByName('csrf-token')[0].content);
-        httpRequest.send(data);
         document.getElementById('div-loading').classList.remove('d-none');// muestro pantalla de carga
-        httpRequest.onreadystatechange = function () {
-            if (httpRequest.readyState === 4) {
+        //ajax function
+        $.ajax({
+            type: "POST",
+            url: urlAction,
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            data: data,
+            contentType: false,
+            processData: false,
+            dataType: 'JSON',
+            success: function(response){
                 document.getElementById('div-loading').classList.add('d-none');
-                console.log(httpRequest.responseText);
-                var response = JSON.parse(httpRequest.responseText);
-                if (response.messageType == "success"){
+                if(response.messageType == "success"){
                     swal(response.message,"","success",{button: "Ok"});
                     document.getElementById('download_ref').href = "files/docx/" + response.fileName;
                     document.getElementById('div-download').classList.remove('d-none');
                 }else{
                     swal(response.message,"","error",{button: "Ok"});
                 }
+            },
+            error: function() { 
+                document.getElementById('div-loading').classList.add('d-none');
+                swal("¡Algo salió mal!","Recargue e intente de nuevo","error",{button: "Ok"}); 
             }
-        };
+        });
     }
 
     return false;
+}
+
+function initializerImportPersonModal(){
+    document.getElementById('personSection').addEventListener("click", function(){
+        document.getElementById('formUploadPerson').reset();
+        dimissAlert('div-download');
+    });
 }
 
 function dimissAlert(divName){
