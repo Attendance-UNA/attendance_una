@@ -1,10 +1,8 @@
-function submitData(){
-    dimissAlert('div-error');
-    dimissAlert('div-success');
+function submitDataPerson(){
     dimissAlert('div-download');
     var file = document.getElementById("xlsx_person").files[0];
     if (file == null || file.name.split(".")[1] != "xlsx"){
-        showMessage("div-error", "error-message", "¡Por favor seleccione un archivo con extensión *.xlsx!");
+        swal("¡Por favor seleccione un archivo con extensión *.xlsx!","Asegurese de seleccionar el archivo con el formato solicitado","error",{button: "Ok"});
     }
     else{ 
         const data = new FormData();
@@ -17,24 +15,20 @@ function submitData(){
         httpRequest.onreadystatechange = function () {
             if (httpRequest.readyState === 4) {
                 document.getElementById('div-loading').classList.add('d-none');
+                console.log(httpRequest.responseText);
                 var response = JSON.parse(httpRequest.responseText);
                 if (response.messageType == "success"){
-                    showMessage("div-success", "success-message", response.message);
+                    swal(response.message,"","success",{button: "Ok"});
                     document.getElementById('download_ref').href = "files/docx/" + response.fileName;
                     document.getElementById('div-download').classList.remove('d-none');
                 }else{
-                    showMessage("div-error", "error-message", response.message);
+                    swal(response.message,"","error",{button: "Ok"});
                 }
             }
         };
     }
 
     return false;
-}
-
-function showMessage(idAlertDiv,idMessageSpan, message){
-    document.getElementById(idMessageSpan).innerHTML = message;
-    document.getElementById(idAlertDiv).classList.remove("d-none");
 }
 
 function dimissAlert(divName){
