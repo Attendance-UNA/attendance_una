@@ -5,14 +5,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="">
         <meta name="author" content="">
-        <title>AttendanceUNA-home</title>
+        <title>UNA Asistencias</title>
+        <!-- Token for send data, very inportant in this file -->
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <!-- Font Awesome icons (free version)-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" crossorigin="anonymous"></script>
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css" rel="stylesheet">
+        <!-- Charge animation form CSS -->
+        <link href="css/loading.css" rel="stylesheet">
         <!-- Fonts CSS-->
-        <link rel="stylesheet" href="css/heading.css">
         <link rel="stylesheet" href="css/body.css">
+        <link rel="stylesheet" href="css/heading.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     </head>
     <body id="page-top">
         <!-- include general navbar blade-->

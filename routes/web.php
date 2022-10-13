@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\example_controller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SubcategoryController;
 
@@ -12,23 +13,18 @@ use App\Http\Controllers\SubcategoryController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-<<<<<<< Updated upstream
-=======
 Route::get('/scancode', function () {
     return view('scanningQR');
 });
-
->>>>>>> Stashed changes
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
 /**
  *  Section routes by subcategory
  */
-Route::post('subcategory/data', [SubcategoryController::class, 'insertSubcategory']);
+Route::post('subcategory/insert', [SubcategoryController::class, 'insertSubcategory']);
 
-Route::get('/subcategory', function () {
-    return view('subcategory.modalSubcategoryView');
-});
+Route::get('subcategory/getdata', [SubcategoryController::class, 'getSubcategories']);
+
+Route::post('subcategory/update', [SubcategoryController::class, 'updateSubcategory']);
