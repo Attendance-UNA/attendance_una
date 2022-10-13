@@ -2,6 +2,7 @@
 use App\Http\Controllers\example_controller;
 use App\Http\Controllers\activityController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SubcategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,3 +40,12 @@ Route::post('guestsTable', 'App\Http\Controllers\activityController@guestsTableC
 
 //route for guests dinamic table 
 Route::post('currentGuests/insert', 'App\Http\Controllers\activityController@currentGuests');
+
+/**
+ *  Section routes by subcategory
+ */
+Route::post('subcategory/insert', [SubcategoryController::class, 'insertSubcategory']);
+
+Route::get('subcategory/getdata', [SubcategoryController::class, 'getSubcategories']);
+
+Route::post('subcategory/update', [SubcategoryController::class, 'updateSubcategory']);
