@@ -44,7 +44,7 @@
                                 <button 
                                     type="button" 
                                     class="btn btn-success"
-                                    onclick="return validateSubmit(true)"
+                                    onclick="return validateSubmitSubcategory(true)"
                                 >
                                     <i class="fas fa-check-circle"></i> Añadir
                                 </button>
@@ -55,14 +55,14 @@
                                 <button 
                                     type="button" 
                                     class="btn btn-primary"
-                                    onclick="return validateSubmit(false)"
+                                    onclick="return validateSubmitSubcategory(false)"
                                 >
                                     <i class="fas fa-wrench"></i> Actualizar
                                 </button>
                                 <button 
                                     type="button" 
                                     class="btn btn-danger"
-                                    onclick="return cancelUpdate()"
+                                    onclick="return cancelUpdateSubcategory()"
                                 >
                                     <i class="fas fa-times-circle"></i> Cancelar
                                 </button>

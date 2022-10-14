@@ -4,9 +4,9 @@
         <script src="js/subcategory/validationDomElements.js"></script>
         <script src="js/subcategory/subcategoryFunctions.js"></script>
     </head>
-    <body onload="initializerEventListener()">
+    <body>
         <!-- Charge loading animation form -->
-        <div class="loading" id="loading" hidden="">
+        <div class="loading" id="loadingBySub" hidden="">
             <div class="loader-outter"></div>
             <div class="loader-inner"></div>
         </div>

@@ -36,7 +36,7 @@ function validateForm(e) {
 /**
  * Clear form fields after making a registration
  */
-function cleanFormSpaces() {
+function cleanFormSpacesSubcategory() {
     document.getElementById('name').value = '';
     document.getElementById('description').value = '';
 }
@@ -44,7 +44,7 @@ function cleanFormSpaces() {
 /**
  * Remove error alerts from form spaces
  */
-function removeErrorInput() {
+function removeErrorInputSubcategory() {
     document.getElementById('name').classList.remove('is-invalid');
     document.getElementById('description').classList.remove('is-invalid');
 }
@@ -62,13 +62,13 @@ function editSubcategory(idSubcategory, name, description){
     document.getElementById('name').value = name;
     document.getElementById('description').value = description;
 
-    removeErrorInput();
+    removeErrorInputSubcategory();
 }
 
 /**
  * The option to edit a subcategory is reverted
  */
-function cancelUpdate() {
+function cancelUpdateSubcategory() {
     document.getElementById('divEditSubcategory').hidden = true;
     document.getElementById('divAddSubcategory').hidden = false;
 
@@ -79,7 +79,7 @@ function cancelUpdate() {
     document.getElementById('name').value = '';
     document.getElementById('description').value = '';
 
-    removeErrorInput();
+    removeErrorInputSubcategory();
 }
 
 /**
@@ -112,9 +112,9 @@ function getAllSubcategories() {
  * Send the data to be reviewed by the validations of the BE
  * and later be registered or updated and received a response
  */
-function submitData(flagAction) {
+function submitDataSubcategory(flagAction) {
     // Activate animation loading send data
-    document.getElementById('loading').hidden = false;
+    document.getElementById('loadingBySub').hidden = false;
 
     var urlAction = '';
     var formSubcategory = document.getElementById('formSubcategory');
@@ -149,18 +149,18 @@ function submitData(flagAction) {
         dataType: 'JSON',
         success: function(response){
             if(response.success){
-                document.getElementById('loading').hidden = true;
+                document.getElementById('loadingBySub').hidden = true;
                 swal("¡"+response.message+"!","","success",{button: "Ok"});
-                cleanFormSpaces();
+                cleanFormSpacesSubcategory();
                 getAllSubcategories();
-                if(!flagAction){ cancelUpdate(); }
+                if(!flagAction){ cancelUpdateSubcategory(); }
             }else{
-                swal("¡"+response.message+"!","Asegurese de editar algún campo","error",{button: "Ok"});
-                document.getElementById('loading').hidden = true;
+                swal("¡"+response.message+"!","Asegurese de editar algún campo","warning",{button: "Ok"});
+                document.getElementById('loadingBySub').hidden = true;
             }
         },
         error: function() { 
-            document.getElementById('loading').hidden = true;
+            document.getElementById('loadingBySub').hidden = true;
             swal("¡Algo salió mal!","Recargue e intente de nuevo","error",{button: "Ok"}); 
         }
     });
@@ -169,7 +169,7 @@ function submitData(flagAction) {
 /**
  * Check the spaces of the form before being sent to registration
  */
-function validateSubmit(flagAction) {
+function validateSubmitSubcategory(flagAction) {
     var formSubcategory = document.getElementById('formSubcategory');
     var arrayFormGroups = formSubcategory.querySelectorAll('input');
     var flag = true;
@@ -185,7 +185,7 @@ function validateSubmit(flagAction) {
     if (flag === false){
         swal("¡Ciertos campos no están correctamente!","","warning",{button: "Ok"});
     }else{
-        submitData(flagAction);
+        submitDataSubcategory(flagAction);
     }
     return false;
 }
@@ -193,7 +193,7 @@ function validateSubmit(flagAction) {
 /**
  * It is aware of what happens with the form fields
  */
-function initializerEventListener() {
+function initializerEventListenerSubcategory() {
     var inputs = document.querySelectorAll("#formSubcategory input");
     inputs.forEach((input) => {
         if (input.type === "text"){
@@ -204,7 +204,7 @@ function initializerEventListener() {
 
     // Access the method that extracts the subcategories when the modal(section) is entered
     document.getElementById("subcategorySection").addEventListener("click", function(){
-        cancelUpdate();
+        cancelUpdateSubcategory();
         getAllSubcategories();
     });
 }
