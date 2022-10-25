@@ -37,4 +37,11 @@ class GeneralValidationsLogic{
     public function validateDescriptionSubcategory($descriptionSubcategory){
         return $this->validateString($descriptionSubcategory, 200, STRING_DETAILS);
     }
+
+    /**
+     * Validate the manager name of the subcategories in case you neeed to review
+     */
+    public function validateManagerSubcategory($manager){
+        return $this->validateString($manager, 100, STRING_W_SPACE);
+    }
 }

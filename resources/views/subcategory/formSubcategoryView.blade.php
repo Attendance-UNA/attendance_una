@@ -16,7 +16,7 @@
                 <form id="formSubcategory">
                     <div class="row">
                         <input type="hidden" name="id_subcategory" id="id_subcategory">
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <div class="form-group" id="div-name">
                                 <input 
                                     type="text" 
@@ -28,7 +28,7 @@
                                 > 
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-7">
                             <div class="form-group" id="div-description">
                                 <input 
                                     type="text" 
@@ -36,6 +36,17 @@
                                     id="description" 
                                     name="description" 
                                     placeholder="Descripción subcategoría"
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group" id="div-manager">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="manager" 
+                                    name="manager" 
+                                    placeholder="Encargado"
                                 >
                             </div>
                         </div>

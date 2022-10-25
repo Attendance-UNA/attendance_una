@@ -17,10 +17,11 @@ class SubcategoryController extends Controller
         $success = false;
         $name = $request::get('name');
         $description = $request::get('description');
+        $manager = $request::get('manager');
         $validation = new GeneralValidationsLogic();
 
-        if($validation->validateNameSubcategory($name) && $validation->validateDescriptionSubcategory($description)){
-            $flagInsert = DB::insert("INSERT INTO tbsubcategory (name, description) VALUES ('".$name."', '".$description."')");
+        if($validation->validateNameSubcategory($name) && $validation->validateDescriptionSubcategory($description) && $validation->validateManagerSubcategory($manager)){
+            $flagInsert = DB::insert("INSERT INTO tbsubcategory (name, description, manager) VALUES ('".$name."', '".$description."', '".$manager."')");
             if($flagInsert){
                 $success = true;
                 $message = "Subcategoría registrada con éxito";
@@ -52,13 +53,14 @@ class SubcategoryController extends Controller
         $success = false;
         $name = $request::get('name');
         $description = $request::get('description');
+        $manager = $request::get('manager');
         $id_subcategory = $request::get('id_subcategory');
         $validation = new GeneralValidationsLogic();
 
-        if($validation->validateNameSubcategory($name) && $validation->validateDescriptionSubcategory($description)){
+        if($validation->validateNameSubcategory($name) && $validation->validateDescriptionSubcategory($description) && $validation->validateManagerSubcategory($manager)){
             $flagUpdate = DB::table('tbsubcategory')
             ->where('id', $id_subcategory )
-            ->update(['name' => $name, 'description' => $description]);
+            ->update(['name' => $name, 'description' => $description, 'manager' => $manager]);
             if($flagUpdate){
                 $success = true;
                 $message = "Subcategoría actualizada con éxito";

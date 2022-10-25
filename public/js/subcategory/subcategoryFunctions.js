@@ -4,7 +4,9 @@
 const subcatgoryExpression = {
     name: /^[a-zA-ZÀ-ÿ0-9\s,]{1,49}$/,
     description: /^[a-zA-ZÀ-ÿ0-9\s,]{1,199}$/,
-    justLetters: /^[a-zA-ZÀ-ÿ0-9]$/
+    manager: /^[a-zA-ZÀ-ÿ\s,]{1,199}$/,
+    justLetters: /^[a-zA-ZÀ-ÿ0-9]$/,
+    onlyLetters: /^[a-zA-ZÀ-ÿ]$/,
 }
 
 /**
@@ -18,7 +20,7 @@ function validateForm(e) {
                 subcatgoryExpression.justLetters, 
                 e.target, 
                 e.target.id, 
-                'Este campo solo se permiten letras y numeros, con un maximo de 50 letras'
+                'Este campo solo se permiten letras y numeros, con un máximo de 50 letras'
             );
 		break;
 		case "description":
@@ -27,9 +29,18 @@ function validateForm(e) {
                 subcatgoryExpression.justLetters, 
                 e.target, 
                 e.target.id, 
-                'Este campo solo se permiten letras y numeros, con un maximo de 200 letras'
+                'Este campo solo se permiten letras y numeros, con un máximo de 200 letras'
             );
 		break;
+        case "manager":
+            validateInputNotRequired(
+                subcatgoryExpression.manager, 
+                subcatgoryExpression.onlyLetters, 
+                e.target, 
+                e.target.id, 
+                'Este campo solo se permiten letras, con un máximo de 100 letras'
+            );
+        break
 	}
 }
 
@@ -39,6 +50,7 @@ function validateForm(e) {
 function cleanFormSpacesSubcategory() {
     document.getElementById('name').value = '';
     document.getElementById('description').value = '';
+    document.getElementById('manager').value = '';
 }
 
 /**
@@ -47,11 +59,12 @@ function cleanFormSpacesSubcategory() {
 function removeErrorInputSubcategory() {
     document.getElementById('name').classList.remove('is-invalid');
     document.getElementById('description').classList.remove('is-invalid');
+    document.getElementById('manager').classList.remove('is-invalid');
 }
 /**
  * Space to submit a change in the form to edit a subcategory
  */
-function editSubcategory(idSubcategory, name, description){
+function editSubcategory(idSubcategory, name, description, manager){
     document.getElementById('divEditSubcategory').hidden = false;
     document.getElementById('divAddSubcategory').hidden = true;
 
@@ -61,6 +74,7 @@ function editSubcategory(idSubcategory, name, description){
     document.getElementById('id_subcategory').value = idSubcategory;
     document.getElementById('name').value = name;
     document.getElementById('description').value = description;
+    document.getElementById('manager').value = manager;
 
     removeErrorInputSubcategory();
 }
@@ -78,6 +92,7 @@ function cancelUpdateSubcategory() {
     document.getElementById('id_subcategory').value = '';
     document.getElementById('name').value = '';
     document.getElementById('description').value = '';
+    document.getElementById('manager').value = '';
 
     removeErrorInputSubcategory();
 }
@@ -97,7 +112,8 @@ function getAllSubcategories() {
                 stringTableBody += '<tr>';
                 stringTableBody += '<td>' + response[i].name + '</td>';
                 stringTableBody += '<td>' + response[i].description + '</td>';
-                stringTableBody += '<td><button onclick="editSubcategory(`' + response[i].id + '`, `' + response[i].name + '`, `' + response[i].description + '`)" class="btn btn-warning"><i class="fas fa-pen fa-fw"></i> Editar</button></td>';
+                stringTableBody += '<td>' + response[i].manager + '</td>';
+                stringTableBody += '<td><button onclick="editSubcategory(`' + response[i].id + '`, `' + response[i].name + '`, `' + response[i].description + '`, `' + response[i].manager + '`)" class="btn btn-warning"><i class="fas fa-pen fa-fw"></i> Editar</button></td>';
                 stringTableBody += '</tr>';
             }
             table.innerHTML = stringTableBody;
