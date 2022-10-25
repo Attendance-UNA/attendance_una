@@ -5,6 +5,7 @@ namespace App\Logic;
 use App\Models\Person;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as ReaderXlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 
 class XlsxLogic{
 
@@ -19,6 +20,7 @@ class XlsxLogic{
         $this->spreadsheet = $this->reader->load($path);
         $this->sheet = $this->spreadsheet->getActiveSheet();
         $this->workSheetInfo = $this->reader->listWorksheetInfo($path);
+        $this->path = $path;
     }
 
     public function readContent($rowBegin, $columns){
@@ -32,6 +34,18 @@ class XlsxLogic{
             $tempRow = []; 
         }
         return $data;
+    }
+
+    public function writeSubcategories($rowBegin, $columns, $subcategories){
+        $count = 0;
+        for ($i = $rowBegin; $i < $rowBegin + count($subcategories); $i++){
+            $this->sheet->setCellValue("{$columns[0]}{$i}", $subcategories[$count]->id);
+            $this->sheet->setCellValue("{$columns[1]}{$i}", $subcategories[$count]->name);
+            $this->sheet->setCellValue("{$columns[2]}{$i}", $subcategories[$count]->description);
+            $count++;
+        }
+        $writer = new XlsxWriter($this->spreadsheet);
+        $writer->save($this->path);
     }
 
     public function checkRequiredColumns($rowBegin, $requiredColumns){

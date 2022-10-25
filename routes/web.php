@@ -17,6 +17,7 @@ use App\Http\Controllers\SubcategoryController;
 
 Route::post('person/import', 'uploadPersonController@importFile');
 Route::get('person/qrcode', 'uploadPersonController@testQRCode');
+Route::get('person/download_template', 'uploadPersonController@downloadPersonTemplate');
 
 //Route for the main page
 Route::get('/', function () {
