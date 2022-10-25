@@ -12,6 +12,7 @@
                             <tr>
                                 <th>Nombre</th>
                                 <th>Descripci&oacute;n</th>
+                                <th>Encargado (a)</th>
                                 <th>Acci&oacute;n</th>
                             </tr>
                         </thead>
