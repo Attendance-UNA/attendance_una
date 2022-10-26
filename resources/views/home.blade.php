@@ -62,8 +62,10 @@
         </div>
     </section>
     @include('person/sectionPersonView')
-        <!-- Section view subcategory portfolio -->
-        @include('subcategory/sectionSubcategoryView')
+    <!-- Section view subcategory portfolio -->
+    @include('subcategory/sectionSubcategoryView')
+    <!-- Section view report portfolio -->
+    @include('report/sectionReportView')
     <!-- new activity Modal-->
     <div class="portfolio-modal modal fade" id="newActivityModal0" tabindex="-1" role="dialog" aria-labelledby="#newActivityModal0Label" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -148,8 +150,10 @@
     </div>
     <!-- modal import person list-->
     @include('person/modalPersonView')
-        <!-- subcategory section Modal-->
-        @include('subcategory/modalSubcategoryView')
+    <!-- subcategory section Modal-->
+    @include('subcategory/modalSubcategoryView')
+    <!-- report section Modal-->
+    @include('report/modalReportView')
 
     <!-- include general footer blade-->
     @include('mainFooter')

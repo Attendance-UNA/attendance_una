@@ -3,6 +3,7 @@ use App\Http\Controllers\example_controller;
 use App\Http\Controllers\activityController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SubcategoryController;
+use App\Http\Controllers\reportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,3 +47,8 @@ Route::post('subcategory/insert', [SubcategoryController::class, 'insertSubcateg
 Route::get('subcategory/getdata', [SubcategoryController::class, 'getSubcategories']);
 
 Route::post('subcategory/update', [SubcategoryController::class, 'updateSubcategory']);
+
+/**
+ * Section routes by reports
+ */
+Route::get('download-pdf-report', [reportController::class, 'generateReport'])->name('download_pdf');
