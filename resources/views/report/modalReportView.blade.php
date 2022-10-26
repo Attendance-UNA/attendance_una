@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <!-- Scripts -->
+        <script src="js/subcategory/validationDomElements.js"></script>
+        <script src="js/report/reportFunctions.js"></script>
     </head>
     <body>
         <!-- Show the modal report -->
@@ -23,10 +24,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="container h-100">
-                                <!-- report section for generate pdf-->
-                                @include('report/generateReportView')
-                            </div>
+                            <!-- report section for generate pdf-->
+                            @include('report/generateReportView')
                             <br>
                             <div class="container">
                                 <button class="btn btn-danger" data-dismiss="modal"><i class="fas fa-times fa-fw"></i>Cerrar</button>
