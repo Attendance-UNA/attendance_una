@@ -6,11 +6,19 @@ use Illuminate\Support\Facades\DB;
 use App\Logic\XlsxLogic;
 use App\Logic\QRCodeLogic;
 use App\Models\Person;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Excel;
 
 class uploadPersonController extends Controller
 {
+
+    public function downloadPersonTemplate(){
+        $subcategories = DB::table('tbsubcategory')->get();
+        $xlsxLogic = new XlsxLogic('files/xlsx/Plantilla_Invitados.xlsx');
+        $xlsxLogic->writeSubcategories(3, ["N", "O", "P"], $subcategories);
+        return response()->download('files/xlsx/Plantilla_Invitados.xlsx');
+    }
 
     public function importFile(Request $request){
         $message = "";
