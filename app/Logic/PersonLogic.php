@@ -24,4 +24,19 @@ class PersonLogic
         }
         return ["inserted"=>$countInsert, "updated"=>$countUpdate];
     }
+
+    public function getSubcategoriesToInsert($people){
+        $subcategoriesToInsert = [];
+        for ($i = 0; $i < count($people); $i++) {
+            $subcategoriesAux = $people[$i]->subcategories;
+            if (is_array($subcategoriesAux) == true && count($subcategoriesAux) > 1){
+                for ($j = 0; $j < count($subcategoriesAux); $j++){
+                    array_push($subcategoriesToInsert, ["idperson"=>$people[$i]->id, "idsubcategory"=>$subcategoriesAux[$j]]);
+                }
+            }else{
+                array_push($subcategoriesToInsert, ["idperson"=>$people[$i]->id, "idsubcategory"=>$subcategoriesAux[0]]);
+            }
+        }
+        return $subcategoriesToInsert;
+    }
 }

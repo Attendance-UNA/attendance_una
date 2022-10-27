@@ -96,7 +96,7 @@ class XlsxLogic{
 
     private function explodeSubcategories($data){
         $subcategories = explode("-", $data);
-        return (count($subcategories) > 1)?$subcategories:$data;
+        return $subcategories;
     }
 
     public function toPersonArray($data){

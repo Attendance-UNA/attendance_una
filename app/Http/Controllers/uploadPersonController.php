@@ -42,28 +42,35 @@ class uploadPersonController extends Controller
                         $peopleInDB = DB::table('tbperson')->get();
                         //call to logic
                         $counters = $personLogic->countInsertedAndUpdatedPerson($people, $peopleInDB);
+                        $subcategoriesToInsert = $personLogic->getSubcategoriesToInsert($people);
                         $qrLogic = new QRCodeLogic();
+                        foreach ($people as $person){
+                            array_push($peopleToInsertUpdate,[
+                                "id" => $person->id,
+                                "name"=>$person->name,
+                                "first_lastname" => $person->firstLastName,
+                                "second_lastname" => $person->secondLastName,
+                                "email"=>$person->email,
+                                "category"=>$person->category,
+                                "status"=>$person->status,
+                                "institutional_card"=> (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
+                                "phone"=> (!is_null($person->phone))?$person->phone:'N/A'
+                            ]);
+
+                        }
                         DB::beginTransaction();
                         try{
-                            foreach ($people as $person){
-                                array_push($peopleToInsertUpdate,[
-                                    "id" => $person->id,
-                                    "name"=>$person->name,
-                                    "first_lastname" => $person->firstLastName,
-                                    "second_lastname" => $person->secondLastName,
-                                    "email"=>$person->email,
-                                    "category"=>$person->category,
-                                    "subcategory"=>$person->subcategories,
-                                    "status"=>$person->status,
-                                    "institutional_card"=> (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
-                                    "phone"=> (!is_null($person->phone))?$person->phone:'N/A'
-                                ]);
-
-                            }
+                            //insert people
                            DB::table('tbperson')->upsert(
                                 $peopleToInsertUpdate,
                                 ['id'],
-                                ['email', 'category', 'subcategory', 'status', 'institutional_card', 'phone']
+                                ['email', 'category', 'status', 'institutional_card', 'phone']
+                            );
+                            //insert subcategories
+                            DB::table('tbsubcategory_person')->upsert(
+                                $subcategoriesToInsert,
+                                ['idperson', 'idsubcategory'],
+                                ['idperson', 'idsubcategory']
                             );
                             DB::commit();
                             $messageType = 'success';
@@ -87,10 +94,5 @@ class uploadPersonController extends Controller
             $message = '¡Por favor seleccione un archivo con extensión *.xlsx!';
         }
         return ["messageType"=>$messageType, "message"=>$message, "fileName"=>(strcmp($messageType, "success") == 0)?$fileName:null];
-    }
-
-    public function testQRCode(){
-        $qrLogic = new QRCodeLogic();
-        return $qrLogic->generateQRCode("402530326");
     }
 }
