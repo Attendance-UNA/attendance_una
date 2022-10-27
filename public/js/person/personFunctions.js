@@ -28,9 +28,10 @@ function submitDataPerson(){
                     swal(response.message,"","error",{button: "Ok"});
                 }
             },
-            error: function() { 
+            error: function(e) {
+                console.log(e); 
                 document.getElementById('div-loading').classList.add('d-none');
-                swal("¡Algo salió mal!","Recargue e intente de nuevo","error",{button: "Ok"}); 
+                swal("¡Algo salió mal!","Recargue e intente de nuevo ","error",{button: "Ok"}); 
             }
         });
     }

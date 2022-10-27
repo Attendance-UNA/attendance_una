@@ -47,20 +47,6 @@ class XlsxLogic{
             ],
         ];
         try{
-            $validation = $this->sheet->getCell('F3')
-                ->getDataValidation();
-            $validation->setType( \PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST );
-            $validation->setErrorStyle( \PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION );
-            $validation->setAllowBlank(false);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('Value is not in list.');
-            $validation->setPromptTitle('Pick from list');
-            $validation->setPrompt('Please pick a value from the drop-down list.');
-            $validation->setFormula1('"Item A,Item B,Item C"');
-            
             $this->spreadsheet->setActiveSheetIndex(1);
             XlsxLogic::setSheet($this->spreadsheet->getActiveSheet());
             $this->sheet->removeRow(3, XlsxLogic::getTotalRows());
@@ -108,6 +94,11 @@ class XlsxLogic{
         return true;
     }
 
+    private function explodeSubcategories($data){
+        $subcategories = explode("-", $data);
+        return (count($subcategories) > 1)?$subcategories:$data;
+    }
+
     public function toPersonArray($data){
         $people = [];
         for ($i = 0; $i < count($data); $i++){
@@ -118,7 +109,7 @@ class XlsxLogic{
                 "secondLastName" => $data[$i][3],
                 "email" => $data[$i][4],
                 "category" => $data[$i][5],
-                "subcategories" => $data[$i][6],
+                "subcategories" => XlsxLogic::explodeSubcategories($data[$i][6]),
                 "status" => $data[$i][7],
                 "institutionalCard" => $data[$i][8],
                 "phone" => $data[$i][9]

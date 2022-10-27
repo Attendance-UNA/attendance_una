@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use App\Logic\XlsxLogic;
 use App\Logic\QRCodeLogic;
+use App\Logic\PersonLogic;
 use App\Models\Person;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
@@ -28,55 +29,49 @@ class uploadPersonController extends Controller
         if (!is_null($request->file('xlsx_person')) && $request->file('xlsx_person')->getClientOriginalExtension() == 'xlsx'){
             $path = $request->file('xlsx_person')->getRealPath();
             $people = [];
+            $peopleToInsertUpdate = [];
             $fileName = "";
-            $countInsert = 0;
-            $countUpdate = 0;
+            $counters = [];
             $xlsxLogic = new XlsxLogic($path);
+            $personLogic = new PersonLogic();
             $data = $xlsxLogic->readContent(3, ["A","B","C","D","E","F","G","H","I","J"]);
             if ($xlsxLogic->getTotalRows() > 2){
                 if ($xlsxLogic->checkRequiredColumns(3, ["A","B","C","D","E","F","G","H"]) == true){
                     if ($xlsxLogic->checkDuplicateColumn(3, "A") == true){
                         $people = $xlsxLogic->toPersonArray($data);
+                        $peopleInDB = DB::table('tbperson')->get();
+                        //call to logic
+                        $counters = $personLogic->countInsertedAndUpdatedPerson($people, $peopleInDB);
                         $qrLogic = new QRCodeLogic();
                         DB::beginTransaction();
                         try{
                             foreach ($people as $person){
-                                if (is_null(DB::table('tbperson')->find($person->id))){//if it is null it will insert the person
-                                    DB::insert(
-                                        'insert into tbperson (id, name, first_lastname, second_lastname, email, category, subcategory, status, institutional_card, phone) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                                        [$person->id,
-                                        $person->name,
-                                        $person->firstLastName,
-                                        $person->secondLastName,
-                                        $person->email,
-                                        $person->category,
-                                        $person->subcategories,
-                                        $person->status,
-                                        (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
-                                        (!is_null($person->phone))?$person->phone:'N/A'
-                                        ]
-                                    );
-                                    $countInsert++;
-                                }else{//else it will update the person
-                                    DB::table('tbperson')
-                                        ->where('id', $person->id)
-                                        ->update([
-                                            'email' => $person->email, 
-                                            'category' => $person->category, 
-                                            'subcategory' => $person->subcategories, 
-                                            'status' => $person->status,
-                                            'institutional_card' => (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
-                                            'phone' => (!is_null($person->phone))?$person->phone:'N/A'
-                                        ]);
-                                    $countUpdate++;
-                                }
+                                array_push($peopleToInsertUpdate,[
+                                    "id" => $person->id,
+                                    "name"=>$person->name,
+                                    "first_lastname" => $person->firstLastName,
+                                    "second_lastname" => $person->secondLastName,
+                                    "email"=>$person->email,
+                                    "category"=>$person->category,
+                                    "subcategory"=>$person->subcategories,
+                                    "status"=>$person->status,
+                                    "institutional_card"=> (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
+                                    "phone"=> (!is_null($person->phone))?$person->phone:'N/A'
+                                ]);
+
                             }
+                           DB::table('tbperson')->upsert(
+                                $peopleToInsertUpdate,
+                                ['id'],
+                                ['email', 'category', 'subcategory', 'status', 'institutional_card', 'phone']
+                            );
                             DB::commit();
                             $messageType = 'success';
-                            $message = "¡Datos importados correctamente! Resultados: {$countInsert} datos registrados y {$countUpdate} datos existentes actualizados";
+                            $message = "¡Datos importados correctamente! Resultados: {$counters["inserted"]} datos registrados y {$counters["updated"]} datos existentes actualizados";
                             $fileName = $qrLogic->writeQrCodeInDoc($people);
                         }catch(\Exception $e){
                             DB::rollBack();
+                            $messageType = "error";
                             $message = "¡No se pudo realizar la transacción, por favor intente de nuevo! Error: " . $e->getMessage();
                         }
                     }else{
