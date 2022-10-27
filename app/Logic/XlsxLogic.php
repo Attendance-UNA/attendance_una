@@ -47,6 +47,20 @@ class XlsxLogic{
             ],
         ];
         try{
+            $validation = $this->sheet->getCell('F3')
+                ->getDataValidation();
+            $validation->setType( \PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST );
+            $validation->setErrorStyle( \PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION );
+            $validation->setAllowBlank(false);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('"Item A,Item B,Item C"');
+            
             $this->spreadsheet->setActiveSheetIndex(1);
             XlsxLogic::setSheet($this->spreadsheet->getActiveSheet());
             $this->sheet->removeRow(3, XlsxLogic::getTotalRows());
