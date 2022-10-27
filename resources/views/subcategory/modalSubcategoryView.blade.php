@@ -29,6 +29,12 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="alert alert-warning" role="alert">
+                                <p>Nota:
+                                    <b>Para reflejar las actualizaciones de la tabla de subcategorias en la plantilla de invitados, por favor despu&eacute;s de cada inserci&oacute;n o actualizaci&oacute;n descargue la plantilla de invidatos en el apartado Descargar Plantilla</b>
+                                </p>
+                            </div>
+                            <br>
                             <div class="container h-100">
                                 <!-- Form subcategory space -->
                                 @include('subcategory/formSubcategoryView')
