@@ -37,15 +37,39 @@ class XlsxLogic{
     }
 
     public function writeSubcategories($rowBegin, $columns, $subcategories){
-        $count = 0;
-        for ($i = $rowBegin; $i < $rowBegin + count($subcategories); $i++){
-            $this->sheet->setCellValue("{$columns[0]}{$i}", $subcategories[$count]->id);
-            $this->sheet->setCellValue("{$columns[1]}{$i}", $subcategories[$count]->name);
-            $this->sheet->setCellValue("{$columns[2]}{$i}", $subcategories[$count]->description);
-            $count++;
+        $success = true;
+        $errorMessage = "";
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        try{
+            $this->spreadsheet->setActiveSheetIndex(1);
+            XlsxLogic::setSheet($this->spreadsheet->getActiveSheet());
+            $this->sheet->removeRow(3, XlsxLogic::getTotalRows());
+            $count = 0;
+            for ($i = $rowBegin; $i < $rowBegin + count($subcategories); $i++){
+
+                //fill the cells with the respective values
+                $this->sheet->setCellValue("{$columns[0]}{$i}", $subcategories[$count]->id);
+                $this->sheet->setCellValue("{$columns[1]}{$i}", $subcategories[$count]->name);
+                $this->sheet->setCellValue("{$columns[2]}{$i}", $subcategories[$count]->description);
+                $this->sheet->setCellValue("{$columns[3]}{$i}", $subcategories[$count]->manager);
+                
+                //applying style
+                $this->sheet->getStyle("{$columns[0]}{$i}:{$columns[3]}{$i}")->applyFromArray($styleArray);
+                $count++;
+            }
+            $writer = new XlsxWriter($this->spreadsheet);
+            $writer->save($this->path);
+        }catch(\Exception $e){
+            $success = false;
+            $errorMessage = $e->getMessage();
         }
-        $writer = new XlsxWriter($this->spreadsheet);
-        $writer->save($this->path);
+        return ["success"=>$success, "error"=>$errorMessage];
     }
 
     public function checkRequiredColumns($rowBegin, $requiredColumns){

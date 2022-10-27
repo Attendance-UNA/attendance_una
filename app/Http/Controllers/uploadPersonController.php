@@ -16,8 +16,10 @@ class uploadPersonController extends Controller
     public function downloadPersonTemplate(){
         $subcategories = DB::table('tbsubcategory')->get();
         $xlsxLogic = new XlsxLogic('files/xlsx/Plantilla_Invitados.xlsx');
-        $xlsxLogic->writeSubcategories(3, ["N", "O", "P"], $subcategories);
-        return response()->download('files/xlsx/Plantilla_Invitados.xlsx');
+        $result = $xlsxLogic->writeSubcategories(3, ["A", "B", "C", "D"], $subcategories);
+        if ($result["success"]){
+            return response()->download('files/xlsx/Plantilla_Invitados.xlsx');
+        }
     }
 
     public function importFile(Request $request){
