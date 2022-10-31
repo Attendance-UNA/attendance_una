@@ -6,6 +6,7 @@ use App\Models\Person;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as ReaderXlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
 class XlsxLogic{
 
@@ -70,6 +71,35 @@ class XlsxLogic{
             $errorMessage = $e->getMessage();
         }
         return ["success"=>$success, "error"=>$errorMessage];
+    }
+
+    public function writeCategories($rowBegin, $column, $categories){
+        $success = true;
+        $errorMessage = "";
+        try{
+            $this->spreadsheet->setActiveSheetIndex(0);
+            XlsxLogic::setSheet($this->spreadsheet->getActiveSheet());
+            $this->sheet->removeRow(3, XlsxLogic::getTotalRows());
+            $this->sheet->insertNewRowBefore(3);
+            $validation = $this->sheet->getCell("{$column}{$rowBegin}")->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(false);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Error de entrada');
+            $validation->setError('No se ha seleccionado una categoria');
+            $validation->setPromptTitle('Seleccione una categoria');
+            $validation->setPrompt('Por favor seleccione una categoria para el invitado');
+            $validation->setFormula1($categories);
+            $writer = new XlsxWriter($this->spreadsheet);
+            $writer->save($this->path);
+        }catch (\Exception $e){
+            $success = false;
+            $errorMessage = $e->getMessage();
+        }
+        return ["success"=>$success, "errorMessage"=>$errorMessage];
     }
 
     public function checkRequiredColumns($rowBegin, $requiredColumns){
