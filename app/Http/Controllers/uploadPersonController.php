@@ -17,10 +17,8 @@ class uploadPersonController extends Controller
     public function downloadPersonTemplate(){
         $subcategories = DB::table('tbsubcategory')->get();
         $categories = DB::table('tbcategory')->get();
-        $categoriesArray = [];
-        foreach($categories as $category){
-            $categoriesArray[] = $category->namecategory;
-        }
+        $personLogic = new PersonLogic();
+        $categoriesArray = $personLogic->toStringCategoriesArray($categories);
         $xlsxLogic = new XlsxLogic('files/xlsx/Plantilla_Invitados.xlsx');
         $resultCategories = $xlsxLogic->writeCategories(3, "F", '"'. implode(",", $categoriesArray). '"');
         $result = $xlsxLogic->writeSubcategories(3, ["A", "B", "C", "D"], $subcategories);
@@ -38,54 +36,61 @@ class uploadPersonController extends Controller
             $peopleToInsertUpdate = [];
             $fileName = "";
             $counters = [];
+            $errors = [];
             $xlsxLogic = new XlsxLogic($path);
             $personLogic = new PersonLogic();
+            $categories = DB::table('tbcategory')->get();
             $data = $xlsxLogic->readContent(3, ["A","B","C","D","E","F","G","H","I","J"]);
             if ($xlsxLogic->getTotalRows() > 2){
                 if ($xlsxLogic->checkRequiredColumns(3, ["A","B","C","D","E","F","G","H"]) == true){
                     if ($xlsxLogic->checkDuplicateColumn(3, "A") == true){
                         $people = $xlsxLogic->toPersonArray($data);
-                        $peopleInDB = DB::table('tbperson')->get();
-                        //call to logic
-                        $counters = $personLogic->countInsertedAndUpdatedPerson($people, $peopleInDB);
-                        $subcategoriesToInsert = $personLogic->getSubcategoriesToInsert($people);
-                        $qrLogic = new QRCodeLogic();
-                        foreach ($people as $person){
-                            array_push($peopleToInsertUpdate,[
-                                "id" => $person->id,
-                                "name"=>$person->name,
-                                "first_lastname" => $person->firstLastName,
-                                "second_lastname" => $person->secondLastName,
-                                "email"=>$person->email,
-                                "category"=>$person->category,
-                                "status"=>$person->status,
-                                "institutional_card"=> (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
-                                "phone"=> (!is_null($person->phone))?$person->phone:'N/A'
-                            ]);
-
-                        }
-                        DB::beginTransaction();
-                        try{
-                            //insert people
-                           DB::table('tbperson')->upsert(
-                                $peopleToInsertUpdate,
-                                ['id'],
-                                ['email', 'category', 'status', 'institutional_card', 'phone']
-                            );
-                            //insert subcategories
-                            DB::table('tbsubcategory_person')->upsert(
-                                $subcategoriesToInsert,
-                                ['idperson', 'idsubcategory'],
-                                ['idperson', 'idsubcategory']
-                            );
-                            DB::commit();
-                            $messageType = 'success';
-                            $message = "¡Datos importados correctamente! Resultados: {$counters["inserted"]} datos registrados y {$counters["updated"]} datos existentes actualizados";
-                            $fileName = $qrLogic->writeQrCodeInDoc($people);
-                        }catch(\Exception $e){
-                            DB::rollBack();
-                            $messageType = "error";
-                            $message = "¡No se pudo realizar la transacción, por favor intente de nuevo! Error: " . $e->getMessage();
+                        $errors = $personLogic->validateDataPeople($people, $personLogic->toStringCategoriesArray($categories));
+                        if (count($errors) == 0){
+                            $peopleInDB = DB::table('tbperson')->get();
+                            //call to logic
+                            $counters = $personLogic->countInsertedAndUpdatedPerson($people, $peopleInDB);
+                            $subcategoriesToInsert = $personLogic->getSubcategoriesToInsert($people);
+                            $qrLogic = new QRCodeLogic();
+                            foreach ($people as $person){
+                                array_push($peopleToInsertUpdate,[
+                                    "id" => $person->id,
+                                    "name"=>$person->name,
+                                    "first_lastname" => $person->firstLastName,
+                                    "second_lastname" => $person->secondLastName,
+                                    "email"=>$person->email,
+                                    "category"=>$person->category,
+                                    "status"=>$person->status,
+                                    "institutional_card"=> (!is_null($person->institutionalCard))?$person->institutionalCard:'N/A',
+                                    "phone"=> (!is_null($person->phone))?$person->phone:'N/A'
+                                ]);
+    
+                            }
+                            DB::beginTransaction();
+                            try{
+                                //insert people
+                               DB::table('tbperson')->upsert(
+                                    $peopleToInsertUpdate,
+                                    ['id'],
+                                    ['email', 'category', 'status', 'institutional_card', 'phone']
+                                );
+                                //insert subcategories
+                                DB::table('tbsubcategory_person')->upsert(
+                                    $subcategoriesToInsert,
+                                    ['idperson', 'idsubcategory'],
+                                    ['idperson', 'idsubcategory']
+                                );
+                                DB::commit();
+                                $messageType = 'success';
+                                $message = "¡Datos importados correctamente! Resultados: {$counters["inserted"]} datos registrados y {$counters["updated"]} datos existentes actualizados";
+                                $fileName = $qrLogic->writeQrCodeInDoc($people);
+                            }catch(\Exception $e){
+                                DB::rollBack();
+                                $messageType = "error";
+                                $message = "¡No se pudo realizar la transacción, por favor intente de nuevo! Error: " . $e->getMessage();
+                            }
+                        }else{
+                            $message = "Se encontraron algunos errores en los datos del archivo: \n\n" . implode("\n\n", array_unique($errors));
                         }
                     }else{
                         $message = "¡Existen datos duplicados en la columna de A del archivo xlsx, por favor revise y corrija los campos!";

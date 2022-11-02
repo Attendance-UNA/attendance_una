@@ -21,11 +21,11 @@ function submitDataPerson(){
             success: function(response){
                 document.getElementById('div-loading').classList.add('d-none');
                 if(response.messageType == "success"){
-                    swal(response.message,"","success",{button: "Ok"});
+                    swal("¡Transacción realizada correctamente!",response.message,"success",{button: "Ok"});
                     document.getElementById('download_ref').href = "files/docx/" + response.fileName;
                     document.getElementById('div-download').classList.remove('d-none');
                 }else{
-                    swal(response.message,"","error",{button: "Ok"});
+                    swal("¡Error!",response.message,"error",{button: "Ok"});
                 }
             },
             error: function(e) {
