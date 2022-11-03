@@ -40,12 +40,13 @@ class uploadPersonController extends Controller
             $xlsxLogic = new XlsxLogic($path);
             $personLogic = new PersonLogic();
             $categories = DB::table('tbcategory')->get();
+            $subcategories = DB::table('tbsubcategory')->get();
             $data = $xlsxLogic->readContent(3, ["A","B","C","D","E","F","G","H","I","J"]);
             if ($xlsxLogic->getTotalRows() > 2){
                 if ($xlsxLogic->checkRequiredColumns(3, ["A","B","C","D","E","F","G","H"]) == true){
                     if ($xlsxLogic->checkDuplicateColumn(3, "A") == true){
                         $people = $xlsxLogic->toPersonArray($data);
-                        $errors = $personLogic->validateDataPeople($people, $personLogic->toStringCategoriesArray($categories));
+                        $errors = $personLogic->validateDataPeople($people, $personLogic->toStringCategoriesArray($categories), $personLogic->toStringSubcategories($subcategories));
                         if (count($errors) == 0){
                             $peopleInDB = DB::table('tbperson')->get();
                             //call to logic
