@@ -51,4 +51,16 @@ Route::post('subcategory/update', [SubcategoryController::class, 'updateSubcateg
 /**
  * Section routes by reports
  */
-Route::get('download-pdf-report', [reportController::class, 'generateReport'])->name('download_pdf');
+Route::post('report/dataNameActivity', [reportController::class, 'getDataNameActivity']);
+
+Route::post('report/desingReportNameActivity', [reportController::class, 'desingReportNameActivity']);
+
+Route::get('report/deleteGarbageReportPDF', [reportController::class, 'deleteGarbageReportPDF']);
+
+Route::post('report/infoDateReport', [reportController::class, 'getInfoDateReport']);
+
+Route::post('report/desingReportDate', [reportController::class, 'desingReportDate']);
+
+Route::post('report/dataReportIdPerson', [reportController::class, 'dataReportIdPerson']);
+
+Route::post('report/desingReportIdPerson', [reportController::class, 'desingReportIdPerson']);

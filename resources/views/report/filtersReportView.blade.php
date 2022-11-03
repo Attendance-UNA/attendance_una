@@ -22,7 +22,7 @@
                     <button 
                         type="button" 
                         class="btn btn-success"
-                        onclick=""
+                        onclick="return btnFilterNameActivity()"
                     >
                         <i class="fa fa-download"></i> Generar
                     </button>
@@ -49,7 +49,7 @@
                     <button 
                         type="button" 
                         class="btn btn-success"
-                        onclick=""
+                        onclick="return btnFilterDate()"
                     >
                         <i class="fa fa-download"></i> Generar
                     </button>
@@ -57,9 +57,9 @@
             </div>
         </div>
         <!-- Shows the space to filter by name academic person -->
-        <div id="filterNameAcademic" hidden="">
+        <div id="filterNamePerson" hidden="">
             <hr>
-            <p>Ingrese el nombre del acad&eacute;mico por filtrar</p>
+            <p>Ingrese el nombre por filtrar</p>
             <div class="row">
                 <div class="col-md-5">
                     <div class="form-group" id="div-firstNameAcedemic">
@@ -108,17 +108,17 @@
             </div>
         </div>
         <!-- Shows the space to filter by identification academic person -->
-        <div id="filterIdAcademic" hidden="">
+        <div id="filterIdPerson" hidden="">
             <hr>
-            <p>Ingrese la c&eacute;dula del acad&eacute;mico</p>
+            <p>Ingrese la c&eacute;dula por filtrar</p>
             <div class="row">
                 <div class="col-md-5">
                     <div class="form-group" id="div-idAcedemic">
                         <input 
                             type="text" 
                             class="form-control" 
-                            id="idAcedemic" 
-                            name="idAcedemic" 
+                            id="idPerson" 
+                            name="idPerson" 
                             placeholder="Identificaci&oacute;n"
                             required=""
                         > 
@@ -128,7 +128,7 @@
                     <button 
                         type="button" 
                         class="btn btn-success"
-                        onclick=""
+                        onclick="return btnFilterIdPerson()"
                     >
                         <i class="fa fa-download"></i> Generar
                     </button>

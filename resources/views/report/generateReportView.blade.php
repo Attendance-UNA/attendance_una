@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html>
-    <!-- Un espacio de prueba -->
-    <div hidden>
-        <p>Para generar un reporte oprima el boton</p>
-        <a href="{{ route('download_pdf') }}" class="btn btn-" style="background-color: yellowgreen;">
-            Generar reporte de asistencias (PDF)
-        </a>
-    </div>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
     <body>
         <div class="container h-100">
             <div class="card">
@@ -23,8 +19,8 @@
                                         <option value="none">Ninguno</option>
                                         <option value="nameActivity">Nombre de actividad</option>
                                         <option value="date">Fecha</option>
-                                        <option value="nameAcademic">Nombre de acad&eacute;mico</option>
-                                        <option value="idAcademic">C&eacute;dula de acad&eacute;mico</option>
+                                        <option value="namePerson">Nombre de persona</option>
+                                        <option value="idPerson">C&eacute;dula de persona</option>
                                     </select>
                                 </div>
                             </div>
