@@ -62,7 +62,7 @@ class PersonLogic
             (strlen($person->institutionalCard) > 0)?(PersonLogic::validateStringData($person->institutionalCard, "/^[0-9]{9}$/"))?null:$errors[] = "El cartnet institucional solo permite números. 9 caracateres fijos":null;
             (strlen($person->phone) > 0 )?(PersonLogic::validateStringData($person->phone, "/^[0-9]{8}$/"))?null:$errors[] = "El télefono solo permite números. 8 caracteres fijos":null;       
             (PersonLogic::validateStringData($person->name,"/^[a-zA-ZÀ-ÿ]{1,49}$/"))?null:$errors[] = "El nombre debe contener solo letras. Máximo 50 caracteres"; 
-            (PersonLogic::checkSubcategories($person->subcategories, $dbSubcategories))?null:$errors[] = "Campo subcategoria con identificadores inexistentes";
+            (PersonLogic::checkSubcategories($person->subcategories, $dbSubcategories))?null:$errors[] = "Campo subcategoria con identificadores inexistentes o mal formato";
         }
         return $errors;
     }
