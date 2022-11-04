@@ -6,6 +6,7 @@ use App\Models\Person;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as ReaderXlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
 class XlsxLogic{
 
@@ -37,15 +38,68 @@ class XlsxLogic{
     }
 
     public function writeSubcategories($rowBegin, $columns, $subcategories){
-        $count = 0;
-        for ($i = $rowBegin; $i < $rowBegin + count($subcategories); $i++){
-            $this->sheet->setCellValue("{$columns[0]}{$i}", $subcategories[$count]->id);
-            $this->sheet->setCellValue("{$columns[1]}{$i}", $subcategories[$count]->name);
-            $this->sheet->setCellValue("{$columns[2]}{$i}", $subcategories[$count]->description);
-            $count++;
+        $success = true;
+        $errorMessage = "";
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                ],
+            ],
+        ];
+        try{
+            $this->spreadsheet->setActiveSheetIndex(1);
+            XlsxLogic::setSheet($this->spreadsheet->getActiveSheet());
+            $this->sheet->removeRow(3, XlsxLogic::getTotalRows());
+            $count = 0;
+            for ($i = $rowBegin; $i < $rowBegin + count($subcategories); $i++){
+
+                //fill the cells with the respective values
+                $this->sheet->setCellValue("{$columns[0]}{$i}", $subcategories[$count]->id);
+                $this->sheet->setCellValue("{$columns[1]}{$i}", $subcategories[$count]->name);
+                $this->sheet->setCellValue("{$columns[2]}{$i}", $subcategories[$count]->description);
+                $this->sheet->setCellValue("{$columns[3]}{$i}", $subcategories[$count]->manager);
+                
+                //applying style
+                $this->sheet->getStyle("{$columns[0]}{$i}:{$columns[3]}{$i}")->applyFromArray($styleArray);
+                $count++;
+            }
+            $writer = new XlsxWriter($this->spreadsheet);
+            $writer->save($this->path);
+        }catch(\Exception $e){
+            $success = false;
+            $errorMessage = $e->getMessage();
         }
-        $writer = new XlsxWriter($this->spreadsheet);
-        $writer->save($this->path);
+        return ["success"=>$success, "error"=>$errorMessage];
+    }
+
+    public function writeCategories($rowBegin, $column, $categories){
+        $success = true;
+        $errorMessage = "";
+        try{
+            $this->spreadsheet->setActiveSheetIndex(0);
+            XlsxLogic::setSheet($this->spreadsheet->getActiveSheet());
+            $this->sheet->removeRow(3, XlsxLogic::getTotalRows());
+            $this->sheet->insertNewRowBefore(3);
+            $validation = $this->sheet->getCell("{$column}{$rowBegin}")->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(false);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Error de entrada');
+            $validation->setError('No se ha seleccionado una categoria');
+            $validation->setPromptTitle('Seleccione una categoria');
+            $validation->setPrompt('Por favor seleccione una categoria para el invitado');
+            $validation->setFormula1($categories);
+            $writer = new XlsxWriter($this->spreadsheet);
+            $writer->save($this->path);
+        }catch (\Exception $e){
+            $success = false;
+            $errorMessage = $e->getMessage();
+        }
+        return ["success"=>$success, "errorMessage"=>$errorMessage];
     }
 
     public function checkRequiredColumns($rowBegin, $requiredColumns){
@@ -70,6 +124,11 @@ class XlsxLogic{
         return true;
     }
 
+    private function explodeSubcategories($data){
+        $subcategories = explode("-", $data);
+        return $subcategories;
+    }
+
     public function toPersonArray($data){
         $people = [];
         for ($i = 0; $i < count($data); $i++){
@@ -80,7 +139,7 @@ class XlsxLogic{
                 "secondLastName" => $data[$i][3],
                 "email" => $data[$i][4],
                 "category" => $data[$i][5],
-                "subcategories" => $data[$i][6],
+                "subcategories" => XlsxLogic::explodeSubcategories($data[$i][6]),
                 "status" => $data[$i][7],
                 "institutionalCard" => $data[$i][8],
                 "phone" => $data[$i][9]
