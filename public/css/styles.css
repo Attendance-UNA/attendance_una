@@ -4492,6 +4492,7 @@ input[type=submit].btn-block {
     padding-top: .3125rem;
     padding-bottom: .3125rem;
     margin-right: 1rem;
+    align-self:initial;
     font-size: 1.25rem;
     line-height: inherit;
     white-space: nowrap
@@ -10913,7 +10914,7 @@ a.text-dark:hover {
     padding-top: 1rem;
     padding-bottom: 1rem;
     font-family: SB Heading, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-    font-weight: 700
+    font-weight: 600
 }
 
 #mainNav .navbar-brand {
@@ -10948,13 +10949,13 @@ a.text-dark:hover {
 
 @media (min-width:992px) {
     #mainNav {
-        padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
         transition: padding-top .3s, padding-bottom .3s
     }
 
     #mainNav .navbar-brand {
-        font-size: 1.75em;
+        font-size: 0.95em;
         transition: font-size .3s
     }
 

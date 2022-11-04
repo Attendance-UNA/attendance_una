@@ -17,7 +17,8 @@ class Activity extends Model
         "endTime",
         "description",
         "manager",
-        "subcategories"
+        "subcategories",
+        "status"  # 1Ready to start 0End, can not start 
     ];
 
 }
