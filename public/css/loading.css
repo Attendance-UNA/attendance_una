@@ -4,6 +4,7 @@
     bottom: 0;
     width: 100%;
     background-color: #f7f7f7;
+    opacity: 0.5;
     z-index: 999999;
   }
   .loading .loader-inner {

@@ -14,6 +14,7 @@
     <!-- Fonts CSS-->
     <link rel="stylesheet" href="css/heading.css">
     <link rel="stylesheet" href="css/body.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
 </head>
 
 <body id="page-top">
@@ -60,6 +61,9 @@
             </div>
         </div>
     </section>
+    @include('person/sectionPersonView')
+        <!-- Section view subcategory portfolio -->
+        @include('subcategory/sectionSubcategoryView')
     <!-- new activity Modal-->
     <div class="portfolio-modal modal fade" id="newActivityModal0" tabindex="-1" role="dialog" aria-labelledby="#newActivityModal0Label" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -79,7 +83,7 @@
                                 </div>
                             </div>
                         </div>
-                        <form action="{{url('postFormToNewActivity')}}" method="post">
+                        <form action="{{url('startActivity')}}" method="post">
                             @csrf
                             <div class="row justify-content-center">
                                 <div class="col-lg-6">
@@ -142,6 +146,11 @@
             </div>
         </div>
     </div>
+    <!-- modal import person list-->
+    @include('person/modalPersonView')
+        <!-- subcategory section Modal-->
+        @include('subcategory/modalSubcategoryView')
+
     <!-- include general footer blade-->
     @include('mainFooter')
     <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes)-->
@@ -151,9 +160,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
     <!-- Third party plugin JS-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-    <!-- Contact form JS-->
-    <script src="assets/mail/jqBootstrapValidation.js"></script>
-    <script src="assets/mail/contact_me.js"></script>
+
     <!-- Core theme JS-->
     <script src="js/scripts.js"></script>
 </body>

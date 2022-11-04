@@ -15,7 +15,7 @@ use Illuminate\Support\Arr;
 class activityController extends Controller
 {
     //function for receive the New Activity form
-    public function postFormToNewActivity(Request $request){
+    public function startActivity(Request $request){
         
         //dd($request->all());  //to check all the datas dumped from the form
         //if your want to get single element,someName in this case
@@ -123,6 +123,103 @@ class activityController extends Controller
 
 
 
+    }
+
+    public function subcategoryList(){
+        $subcategories= DB::table('tbsubcategory')->get();
+
+        $arrayInfo = array();
+        if(count($subcategories)==0){
+            array_push($arrayInfo, array("success"=>0));
+        }else{
+            array_push($arrayInfo, array("success"=>1));
+
+            foreach ($subcategories as $subcategory) {
+
+                $arrayAux = array("id"=>$subcategory->id, "name"=>$subcategory->name,
+                "description"=>$subcategory->description);
+                
+                array_push($arrayInfo, $arrayAux);
+            }
+    
+        }
+        return response()->json($arrayInfo);
+    }
+
+    public function activitiesList(){
+        $activities= DB::table('tbactivity')->where('status','LIKE',1)->get();
+
+        $arrayInfo = array();
+        if(count($activities)==0){
+            array_push($arrayInfo, array("success"=>0));
+        }else{
+            array_push($arrayInfo, array("success"=>1));
+
+            foreach ($activities as $activity) {
+
+                $arrayAux = array("id"=>$activity->id, "name"=>$activity->name,
+                "date"=>$activity->date,"manager"=>$activity->manager);
+                
+                array_push($arrayInfo, $arrayAux);
+            }
+    
+        }
+        
+        return response()->json($arrayInfo);
+
+
+    }
+
+    /**
+     * Receives the data of the NEW ACTIVITY to insert them into the database
+     */
+    public function insertActivity(Request $request) {
+
+        $message = "Error";
+        $success = false;
+
+        $activityName = $request::get('activityName');
+        $activityDescription = $request::get('activityDescription');
+        $activityManagername = $request::get('activityManagername');
+        $activityDate = $request::get('activityDate');
+
+        $CategorySubcategoryList=$request::get('CategorySubcategoryList');
+
+        if($activityName!=null&&$activityDescription!=null&&$activityManagername!=null&&$activityDate!=null){
+        if($CategorySubcategoryList!=null){
+            if($this->validateDate($activityDate)){
+                $flagInsert = DB::insert("INSERT INTO tbactivity (name,date, description,manager,status) VALUES ('".$activityName."', '".$activityDate."', '".$activityDescription."', '".$activityManagername."',". 1 .")");
+                if($flagInsert){
+                    $success = true;
+                    $message = "Actividad registrada con éxito";
+                }else{
+                    $message = "Error al registrar en la base de datos";
+                }
+            }else{
+                $message = "Error en la fecha, no puede ser anterior al día actual";
+            }
+        }else{
+            $message = "Error, debe agregar al menos una categoría o subcategoría!";
+        }
+        }else{
+            $message = "Error, verifique que no hayan datos vacíos.";
+        }
+        // Send data by json to javascript ajax
+        $arrayInfo = array();
+        $arrayInfo = array("success"=>$success, "message"=>$message);
+        echo json_encode($arrayInfo);
+
+    }
+
+    public function validateDate($date){
+        $today= date("Y-m-d");
+        $dateCreate = date_create($date);
+        $dateFormat =date_format($dateCreate, 'Y-m-d');
+        $result=false;
+        if ($today <= $dateFormat) {
+            $result=true;
+        }
+        return $result;
     }
 
 }
