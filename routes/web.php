@@ -51,16 +51,18 @@ Route::post('subcategory/update', [SubcategoryController::class, 'updateSubcateg
 /**
  * Section routes by reports
  */
-Route::post('report/dataNameActivity', [reportController::class, 'getDataNameActivity']);
+Route::post('report/requestDataNameActivity', [reportController::class, 'requestDataNameActivity']);
 
-Route::post('report/desingReportNameActivity', [reportController::class, 'desingReportNameActivity']);
+Route::post('report/printReportNameActivity', [reportController::class, 'printReportNameActivity']);
+
+Route::post('report/requestDataDate', [reportController::class, 'requestDataDate']);
+
+Route::post('report/printReportDate', [reportController::class, 'printReportDate']);
+
+Route::post('report/requestDataPerson', [reportController::class, 'requestDataPerson']);
+
+Route::post('report/printReportPerson', [reportController::class, 'printReportPerson']);
+
+Route::post('report/requestTableDataPerson', [reportController::class, 'requestTableDataPerson']);
 
 Route::get('report/deleteGarbageReportPDF', [reportController::class, 'deleteGarbageReportPDF']);
-
-Route::post('report/infoDateReport', [reportController::class, 'getInfoDateReport']);
-
-Route::post('report/desingReportDate', [reportController::class, 'desingReportDate']);
-
-Route::post('report/dataReportIdPerson', [reportController::class, 'dataReportIdPerson']);
-
-Route::post('report/desingReportIdPerson', [reportController::class, 'desingReportIdPerson']);

@@ -28,32 +28,37 @@ function showFilterTypeReport () {
     switch (typeReport) {
         case "nameActivity":
             document.getElementById('filterNameActivity').hidden = false;
+            document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNamePerson').hidden = true;
             document.getElementById('filterIdPerson').hidden = true;
             document.getElementById('filterDate').hidden = true;
         break;
         case "date":
             document.getElementById('filterDate').hidden = false;
-            document.getElementById('filterIdPerson').hidden = true;
+            document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNameActivity').hidden = true;
             document.getElementById('filterNamePerson').hidden = true;
+            document.getElementById('filterIdPerson').hidden = true;
         break;
         case "namePerson":
             document.getElementById('filterNamePerson').hidden = false;
+            document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNameActivity').hidden = true;
             document.getElementById('filterIdPerson').hidden = true;
             document.getElementById('filterDate').hidden = true;
         break;
         case "idPerson":
             document.getElementById('filterIdPerson').hidden = false;
-            document.getElementById('filterNamePerson').hidden = true;
+            document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNameActivity').hidden = true;
+            document.getElementById('filterNamePerson').hidden = true;
             document.getElementById('filterDate').hidden = true;
         break;
         default:
             document.getElementById('filterIdPerson').hidden = true;
-            document.getElementById('filterNamePerson').hidden = true;
+            document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNameActivity').hidden = true;
+            document.getElementById('filterNamePerson').hidden = true;
             document.getElementById('filterDate').hidden = true;
         break;
     }
@@ -71,17 +76,17 @@ function deleteGarbageReportPDF() {
 }
 
 /**
- * Send the request to request the data by the requested activity name
+ * Extract the information required by the filtered activity name
  */
-function btnFilterNameActivity () {
+function filterReportNameActivity () {
     var nameActivity = document.getElementById('nameActivity').value // Extract the name of the activity
-    if(nameActivity != ''){ // Check that it does not come empty
+    if(nameActivity !== ''){ // Check that it does not come empty
         const formData = new FormData();        
         formData.append('nameActivity', nameActivity); // Store the data to send it to controller
 
         $.ajax({
             type: "POST",
-            url: 'report/dataNameActivity',
+            url: 'report/requestDataNameActivity', // Communicates with the web.php class
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             data: formData,
             contentType: false,
@@ -90,15 +95,15 @@ function btnFilterNameActivity () {
             success: function(response){
                 if(response.success){
                     // Once it obtains the data, it sends them to print the report
-                    sendDataReportNameActivity(response.data, response.activityData, nameActivity);
+                    printReportNameActivity(response.data, response.activityData, nameActivity);
                 }else{
-                    swal(response.message,"","warning",{button: "Ok"});
+                    swal(response.message,"Verifique que el nombre este bien escrito","warning",{button: "Ok"});
                 }
             },
             error: function() { 
                 //document.getElementById('loadingBySub').hidden = true;
                 //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
-                console.log('Algo esta fallando');
+                console.log('Error en reporte nombre actividad');
             }
         });
     }else{
@@ -107,17 +112,17 @@ function btnFilterNameActivity () {
 }
 
 /**
- * Send the request to generate the report by filtering the activity name
+ * The report is printed by activity name with the data provided
  */
- function sendDataReportNameActivity (packageData, activityData, nameActivity){
+ function printReportNameActivity (attendanceData, activityData, nameActivity){
     const formDatax = new FormData();
-    // Prepare the data to send to the controller
-    formDatax.append('packageNameActivity', JSON.stringify(packageData));
+    // Prepare the data (attendance & activity) to send to the controller
+    formDatax.append('attendanceData', JSON.stringify(attendanceData));
     formDatax.append('activityData', JSON.stringify(activityData));
     
     $.ajax({
         type: 'POST',
-        url: 'report/desingReportNameActivity',
+        url: 'report/printReportNameActivity', // Communicates with the web.php class
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         data: formDatax,
         contentType: false,
@@ -126,7 +131,7 @@ function btnFilterNameActivity () {
             responseType: 'blob'
         },
         success: function(response){
-            // Redesign the report to print
+            // Redesign the report to print and download
             var blob = new Blob([response]);
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
@@ -135,23 +140,23 @@ function btnFilterNameActivity () {
             deleteGarbageReportPDF(); // Remove generated garbage from created report
         },
         error: function(){
-            console.log('Error al generar reporte');
+            console.log('Error al generar reporte por nombre actividad');
         }
     });
 }
 
 /**
- * Send the request to request the data by the date entered
+ * Extract the information required by the date entered
  */
-function btnFilterDate() {
-    var dateReport = document.getElementById('dateReport').value
-    if(dateReport != ''){
+function filterReportDate() {
+    var date = document.getElementById('dateReport').value
+    if(date !== ''){
         const formData = new FormData();        
-        formData.append('dateReport', dateReport);
+        formData.append('date', date);
 
         $.ajax({
             type: "POST",
-            url: 'report/infoDateReport',
+            url: 'report/requestDataDate', // Communicates with the web.php class
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             data: formData,
             contentType: false,
@@ -160,15 +165,15 @@ function btnFilterDate() {
             success: function(response){
                 if(response.success){
                     // Once it obtains the data, it sends them to print the report
-                    sendDataReportByDate(response.data, dateReport);
+                    printReportDate(response.data, date);
                 }else{
-                    swal(response.message,"","warning",{button: "Ok"});
+                    swal(response.message,"Verifique que la fecha este correcta","warning",{button: "Ok"});
                 }
             },
             error: function() { 
                 //document.getElementById('loadingBySub').hidden = true;
                 //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
-                console.log('Algo esta fallando en seccion fecha');
+                console.log('Error en reporte por fecha');
             }
         });
 
@@ -178,17 +183,17 @@ function btnFilterDate() {
 }
 
 /**
- * Send the request to generate the report filtering the date
+ * Print the date report with the data provided
  */
-function sendDataReportByDate(packageDateReport, date) {
+function printReportDate(attendanceData, date) {
     const formDatax = new FormData();
     // Prepare the data to send to the controller
-    formDatax.append('packageDateReport', JSON.stringify(packageDateReport));
+    formDatax.append('attendanceData', JSON.stringify(attendanceData));
     formDatax.append('date', JSON.stringify(date));
 
     $.ajax({
         type: 'POST',
-        url: 'report/desingReportDate',
+        url: 'report/printReportDate', // Communicates with the web.php class
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         data: formDatax,
         contentType: false,
@@ -206,7 +211,7 @@ function sendDataReportByDate(packageDateReport, date) {
             deleteGarbageReportPDF(); // Remove generated garbage from created report
         },
         error: function(){
-            console.log('Error al generar reporte');
+            console.log('Error al generar reporte por fecha');
         }
     });
 }
@@ -214,15 +219,15 @@ function sendDataReportByDate(packageDateReport, date) {
 /**
  * Send the request to request the by person id
  */
-function btnFilterIdPerson() {
+function filterReportIdPerson() {
     var idPerson = document.getElementById('idPerson').value
-    if(idPerson != ''){
+    if(idPerson !== ''){
         const formData = new FormData();        
         formData.append('idPerson', idPerson);
 
         $.ajax({
             type: "POST",
-            url: 'report/dataReportIdPerson',
+            url: 'report/requestDataPerson', // Communicates with the web.php class
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             data: formData,
             contentType: false,
@@ -231,7 +236,7 @@ function btnFilterIdPerson() {
             success: function(response){
                 if(response.success){
                     // Once it obtains the data, it sends them to print the report
-                    sendDataReportByIdPerson(response.person, response.activity);
+                    printReportPerson(response.person, response.attendance);
                 }else{
                     swal(response.message,"","warning",{button: "Ok"});
                 }
@@ -239,7 +244,7 @@ function btnFilterIdPerson() {
             error: function() { 
                 //document.getElementById('loadingBySub').hidden = true;
                 //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
-                console.log('Algo esta fallando en seccion cedula persona');
+                console.log('Error en reporte cedula persona');
             }
         });
 
@@ -251,15 +256,15 @@ function btnFilterIdPerson() {
 /**
  * Send the request to generate the report filtering the person's identity card
  */
-function sendDataReportByIdPerson(personData, activityArrayData) {
+function printReportPerson(personData, attendanceData) {
     const formDatax = new FormData();
     // Prepare the data to send to the controller
     formDatax.append('personData', JSON.stringify(personData));
-    formDatax.append('activityArrayData', JSON.stringify(activityArrayData));
+    formDatax.append('attendanceData', JSON.stringify(attendanceData));
 
     $.ajax({
         type: 'POST',
-        url: 'report/desingReportIdPerson',
+        url: 'report/printReportPerson', // Communicates with the web.php class
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         data: formDatax,
         contentType: false,
@@ -272,12 +277,111 @@ function sendDataReportByIdPerson(personData, activityArrayData) {
             var blob = new Blob([response]);
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = "Reporte por cédula "+personData.id+".pdf";
+            link.download = "Reporte de persona "+personData.id+".pdf";
             link.click();
             deleteGarbageReportPDF(); // Remove generated garbage from created report
         },
         error: function(){
-            console.log('Error al generar reporte');
+            console.log('Error al generar reporte por persona');
+        }
+    });
+}
+
+/**
+ * Filter entered names and place them in a table
+ */
+function filterTablePersonName() {
+    document.getElementById('tablePersonListReport').hidden = true;
+    var firstNamePerson = document.getElementById('firstNamePerson').value
+    var firstLastNamePerson = document.getElementById('firstLastNamePerson').value
+    var secondLastNamePerson = document.getElementById('secondLastNamePerson').value || ''
+
+    if(firstNamePerson !== '' && firstLastNamePerson !== ''){
+        // Pendiente el if que revisa la valicadion del segundo apellido
+        const formData = new FormData();        
+        formData.append('firstNamePerson', firstNamePerson);
+        formData.append('firstLastNamePerson', firstLastNamePerson);
+        formData.append('secondLastNamePerson', secondLastNamePerson);
+
+        $.ajax({
+            type: "POST",
+            url: 'report/requestTableDataPerson', // Communicates with the web.php class
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'JSON',
+            success: function(response){
+                if(response.success){
+                    // Once it obtains the data, it sends them to print the report
+                    createTableDataPersonName(response.data)
+                }else{
+                    swal(response.message,"","warning",{button: "Ok"});
+                }
+            },
+            error: function() { 
+                //document.getElementById('loadingBySub').hidden = true;
+                //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
+                console.log('Algo esta fallando en seccion nombre persona');
+            }
+        });
+        
+    }else{
+        swal("¡Por favor llene los campos!","Debe de tener como mínimo nombre y primer apellido",
+        "warning",{button: "Ok"});
+    }
+}
+
+/**
+ * Create and style the table with the filtered names
+ */
+function createTableDataPersonName(dataPersonsNames) {
+    var table = document.querySelector("#table_list_complemet_name_person");
+    var response = dataPersonsNames;
+    var stringTableBody = "";
+
+    document.getElementById('tablePersonListReport').hidden = false;
+
+    table.innerHTML = '';
+    for(var i = 0; i < response.length; i++){
+        stringTableBody += '<tr>';
+        stringTableBody += '<td>' + response[i].id + '</td>';
+        stringTableBody += '<td>' + response[i].name + '</td>';
+        stringTableBody += '<td>' + response[i].first_lastname + '</td>';
+        stringTableBody += '<td>' + response[i].second_lastname + '</td>';
+        stringTableBody += '<td><button onclick="filterReportNamePerson(`' + response[i].id + '`)" class="btn btn-success"><i class="fa fa-download"></i> Generar</button></td>';
+        stringTableBody += '</tr>';
+    }
+    table.innerHTML = stringTableBody;
+}
+
+/**
+ * Obtains the attendance data of the selected person
+ */
+function filterReportNamePerson(idPerson) {
+    const formData = new FormData();        
+    formData.append('idPerson', idPerson);
+
+    $.ajax({
+        type: "POST",
+        url: 'report/requestDataPerson',
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: 'JSON',
+        success: function(response){
+            if(response.success){
+                // Once it obtains the data, it sends them to print the report
+                printReportPerson(response.person, response.attendance);
+            }else{
+                swal(response.message,"","warning",{button: "Ok"});
+            }
+        },
+        error: function() { 
+            //document.getElementById('loadingBySub').hidden = true;
+            //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
+            console.log('Algo esta fallando en seccion cedula persona');
         }
     });
 }

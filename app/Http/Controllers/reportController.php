@@ -9,9 +9,32 @@ use stdClass;
 class reportController extends Controller
 {
     /**
+     * It is responsible for creating a PDF document with the data provided
+     */
+    public function createPdfDocument($pdf) {
+        // Perform PDF Layout Generator
+        $path = public_path('pdf/');
+        $fileName = time().'.'. 'pdf' ;
+        $pdf->save($path . '/' . $fileName);
+        $pdf = public_path('pdf/'.$fileName);
+        return response()->download($pdf); // Respond to ajax with the generated PDF
+    }
+
+    /**
+     * Removes junk files from pdf generated for reports
+     */
+    public function deleteGarbageReportPDF() {
+        $files = glob('pdf/*'); // Select all existing files in the folder
+        foreach($files as $file){
+            if(is_file($file))
+            unlink($file); // Delete all selected files
+        }
+    }
+
+    /**
      * Gets the necessary information from the activity name
      */
-    public function getDataNameActivity(Request $request) {
+    public function requestDataNameActivity(Request $request) {
         $message = '';
         $success = false;
         $nameActivity = $request::get('nameActivity'); // Get the activity name provided by the ajax
@@ -22,23 +45,24 @@ class reportController extends Controller
         $arrayPersonsCategory = array();
         $finalArrayAttendance= array();
         
-        // Extract the id of the activity found
+        // Extract the data of the queried activity
         $activity = DB::table('tbactivity')->where('name', $nameActivity)->get();
         
-        if(sizeof($activity) != 0) { // Enter if the activity name is present in the system
+        if(sizeof($activity) != 0) { // Continue if query contains data
 
-            $activity = $activity[0]; // Take the first element of the activities
+            $activity = $activity[0]; // Take the first element (activity) of the array
 
             // Stores activity data
             $activityData = new stdClass();
-            $activityData->nameAcvivity = $activity->name;
             $activityData->date = $activity->date;
-            $activityData->start_time = $activity->start_time;
-            $activityData->end_time = $activity->end_time;
             $activityData->manager = $activity->manager;
+            $activityData->nameAcvivity = $activity->name;
+            $activityData->end_time = $activity->end_time;
+            $activityData->start_time = $activity->start_time;
 
-            // Extract the categories related to the activity
-            $activityCategories = DB::table('tbactivity_category')->where('id_activity', $activity->id)->pluck('category');
+            // Extract the categories related to the queried activity
+            $activityCategories = DB::table('tbactivity_category')->where('id_activity', $activity->id)
+            ->pluck('category');
             
             foreach ($activityCategories as $category) {
                 /**
@@ -46,13 +70,16 @@ class reportController extends Controller
                  * that are active within the system
                  */
                 $listPersonsCategory = DB::table('tbperson')->where('category', $category)->get();
-                array_push($arrayPersonsCategory, $listPersonsCategory);
+                array_push($arrayPersonsCategory, $listPersonsCategory); // Save the data of each query
             }
     
             foreach ($arrayPersonsCategory as $groupPersonCategories) {
+                /**
+                 * Browse the people who relate to the category
+                 */
                 foreach ($groupPersonCategories as $person) {
                     /**
-                     * Search the relationship of people with the activity sought
+                     * Search the relationship of people with the consulted activity
                      */
                     $attendance = DB::table('tbactivity_person')
                     ->where([['id_activity', $activity->id], ['id_person', $person->id]])->get();
@@ -60,16 +87,21 @@ class reportController extends Controller
                     // Personal data is stored
                     $activityInfoPackage = new stdClass();
                     $activityInfoPackage->name = $person->name;
+                    $activityInfoPackage->category = $person->category;
                     $activityInfoPackage->first_lastname = $person->first_lastname;
                     $activityInfoPackage->second_lastname = $person->second_lastname;
-                    $activityInfoPackage->category = $person->category;
 
                     // The person's attendance data is stored
                     if(sizeof($attendance) != 0){
-                        $asisst = $attendance[0];
+                        /**
+                         * It is recognized that he did attend
+                         */
                         $activityInfoPackage->present = 'Si';
-                        $activityInfoPackage->entry_hour = $asisst->entry_hour;
+                        $activityInfoPackage->entry_hour = $attendance[0]->entry_hour;
                     }else{
+                        /**
+                         * It is recognized that he was absent
+                         */
                         $activityInfoPackage->present = 'No';
                         $activityInfoPackage->entry_hour = '00:00:00';
                     }
@@ -88,50 +120,48 @@ class reportController extends Controller
 
         // Send data by json to javascript ajax
         $arrayInfo = array();
-        $arrayInfo = array("data" => $finalArrayAttendance, "activityData" => $activityData, "message" => $message, "success" => $success);
+        $arrayInfo = array("data" => $finalArrayAttendance, "activityData" => $activityData,
+        "message" => $message, "success" => $success);
         echo json_encode($arrayInfo);
     }
 
     /**
-     * Make the design of the activity name report
+     * Print the report by activity name with the data provided
      */
-    public function desingReportNameActivity(Request $request) {
+    public function printReportNameActivity(Request $request) {
         // Get the data provided from the ajax
-        $dataActivity = json_decode($request::get('packageNameActivity'));
+        $attendanceData = json_decode($request::get('attendanceData'));
         $onlyActivityData = json_decode($request::get('activityData'));
 
         // Makes the call to generate the report with the data provided
         $pdf = Pdf::loadView('report.designs.desingReportNameActivityView', 
-        compact('dataActivity', 'onlyActivityData'));
+        compact('attendanceData', 'onlyActivityData'));
 
-        // Perform PDF Layout Generator
-        $path = public_path('pdf/');
-        $fileName = time().'.'. 'pdf' ;
-        $pdf->save($path . '/' . $fileName);
-        $pdf = public_path('pdf/'.$fileName);
-        return response()->download($pdf); // Respond to ajax with the generated PDF
+        // Create the pdf document and respond to the ajax
+        return $this->createPdfDocument($pdf);
     }
 
     /**
      * Obtains the necessary attendance information on a date
      */
-    public function getInfoDateReport(Request $request) {
+    public function requestDataDate(Request $request) {
         $message = '';
         $success = false;
-        $dateReport = $request::get('dateReport'); // Get the date provided by the ajax
+        $date = $request::get('date'); // Get the date provided by the ajax
 
         $attendance = '';
         $listPersonsCategory = '';
         $arrayPersonsCategory = array();
         $finalArrayAttendance= array();
 
-        // Extracts the activities that match the date
-        $activities = DB::table('tbactivity')->where('date', $dateReport)->get();
+        // Extract the activities that match the entered date
+        $activities = DB::table('tbactivity')->where('date', $date)->get();
 
-        if(sizeof($activities) != 0) { 
+        if(sizeof($activities) != 0) { // Continue if query contains data
             foreach($activities as $activity) {
                 // Extract the categories related to the activity
-                $activityCategories = DB::table('tbactivity_category')->where('id_activity', $activity->id)->pluck('category');
+                $activityCategories = DB::table('tbactivity_category')->where('id_activity', $activity->id)
+                ->pluck('category');
                 foreach ($activityCategories as $category) {
                     /**
                      * Extract the people that belong to a search category and
@@ -151,17 +181,22 @@ class reportController extends Controller
     
                         // Personal data is stored
                         $activityInfoPackage = new stdClass();
-                        $activityInfoPackage->nameActivity = $activity->name;
                         $activityInfoPackage->name = $person->name;
+                        $activityInfoPackage->nameActivity = $activity->name;
                         $activityInfoPackage->first_lastname = $person->first_lastname;
                         $activityInfoPackage->second_lastname = $person->second_lastname;
     
                         // The person's attendance data is stored
                         if(sizeof($attendance) != 0){
-                            $asisst = $attendance[0];
+                            /**
+                             * It is recognized that he did attend
+                             */
                             $activityInfoPackage->present = 'Si';
-                            $activityInfoPackage->entry_hour = $asisst->entry_hour;
+                            $activityInfoPackage->entry_hour = $attendance[0]->entry_hour;
                         }else{
+                            /**
+                             * It is recognized that he was absent
+                             */
                             $activityInfoPackage->present = 'No';
                             $activityInfoPackage->entry_hour = '00:00:00';
                         }
@@ -187,29 +222,25 @@ class reportController extends Controller
     }
 
     /**
-     * 
+     * Print the report by date with the data provided
      */
-    public function desingReportDate(Request $request) {
+    public function printReportDate(Request $request) {
         // Get the data provided from the ajax
-        $packageDateReport = json_decode($request::get('packageDateReport'));
+        $attendanceData = json_decode($request::get('attendanceData'));
         $date = json_decode($request::get('date'));
 
         // Makes the call to generate the report with the data provided
         $pdf = Pdf::loadView('report.designs.desingReportDateView', 
-        compact('packageDateReport', 'date'));
+        compact('attendanceData', 'date'));
 
-        // Perform PDF Layout Generator
-        $path = public_path('pdf/');
-        $fileName = time().'.'. 'pdf' ;
-        $pdf->save($path . '/' . $fileName);
-        $pdf = public_path('pdf/'.$fileName);
-        return response()->download($pdf); // Respond to ajax with the generated PDF
+        // Create the pdf document and respond to the ajax
+        return $this->createPdfDocument($pdf);
     }
 
     /**
-     * 
+     * Obtains the necessary data for the filtered person
      */
-    public function dataReportIdPerson(Request $request) {
+    public function requestDataPerson(Request $request) {
         $message = '';
         $success = false;
         $idPerson = $request::get('idPerson'); // Get the date provided by the ajax
@@ -255,16 +286,23 @@ class reportController extends Controller
 
                         foreach($activityPerson as $aux2){
                             if($aux2->id_person == $idPerson){
-                                // Asistio
+                                /**
+                                 * It is recognized that he did attend
+                                 */
                                 $activityData->entry_hour = $aux2->entry_hour;
                                 $activityData->present = 'Si';
                             }else{
-                                // No asistio
+                                /**
+                                 * It is recognized that he was absent
+                                 */
                                 $activityData->entry_hour = '00:00:00';
                                 $activityData->present = 'No';
                             }
                         }
     
+                        /**
+                         * Packaging of data to send to the report design
+                         */
                         $arrayAux = array("activityInfoPackage" => $activityData);
                         array_push($packArrayActivity, $arrayAux);
                     }
@@ -277,38 +315,54 @@ class reportController extends Controller
 
         // Send data by json to javascript ajax
         $arrayInfo = array();
-        $arrayInfo = array("activity" => $packArrayActivity, "person" => $personData, "message" => $message, "success" => $success);
+        $arrayInfo = array("attendance" => $packArrayActivity, "person" => $personData,
+        "message" => $message, "success" => $success);
         echo json_encode($arrayInfo);
     }
     
     /**
      * Design the report by ID number person
      */
-    public function desingReportIdPerson(Request $request) {
+    public function printReportPerson(Request $request) {
         // Get the data provided from the ajax
         $personData = json_decode($request::get('personData'));
-        $activityArrayData = json_decode($request::get('activityArrayData'));
+        $attendanceData = json_decode($request::get('attendanceData'));
 
         // Makes the call to generate the report with the data provided
         $pdf = Pdf::loadView('report.designs.desingReportPersonView', 
-        compact('personData', 'activityArrayData'));
+        compact('personData', 'attendanceData'));
 
-        // Perform PDF Layout Generator
-        $path = public_path('pdf/');
-        $fileName = time().'.'. 'pdf' ;
-        $pdf->save($path . '/' . $fileName);
-        $pdf = public_path('pdf/'.$fileName);
-        return response()->download($pdf); // Respond to ajax with the generated PDF
+        // Create the pdf document and respond to the ajax
+        return $this->createPdfDocument($pdf);
     }
 
-    /**
-     * Removes junk files from pdf generated for reports
-     */
-    public function deleteGarbageReportPDF() {
-        $files = glob('pdf/*'); // Select all existing files in the folder
-        foreach($files as $file){
-            if(is_file($file))
-            unlink($file); // Delete all selected files
+    public function requestTableDataPerson(Request $request) {
+        $message = '';
+        $success = true;
+        $namesPersons = [];
+
+        // Get the date provided by the ajax
+        $firstNamePerson = $request::get('firstNamePerson');
+        $firstLastNamePerson = $request::get('firstLastNamePerson');
+        $secondLastNamePerson = $request::get('secondLastNamePerson');
+
+        if($secondLastNamePerson == ''){
+            $namesPersons = DB::table('tbperson')
+            ->where([['name', $firstNamePerson], ['first_lastname', $firstLastNamePerson]])->get();
+        }else{
+            $namesPersons = DB::table('tbperson')
+            ->where([['name', $firstNamePerson], ['first_lastname', $firstLastNamePerson], 
+            ['second_lastname', $secondLastNamePerson]])->get();
         }
+
+        if(sizeof($namesPersons) == 0){
+            $success = false;
+            $message = 'No existen personas regitradas con el nombre ingresado';
+        }
+
+        // Send data by json to javascript ajax
+        $arrayInfo = array();
+        $arrayInfo = array("data" => $namesPersons, "message" => $message, "success" => $success);
+        echo json_encode($arrayInfo);
     }
 }
