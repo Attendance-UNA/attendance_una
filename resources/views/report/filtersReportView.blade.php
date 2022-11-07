@@ -20,13 +20,15 @@
                 <div class="col-md-4">
                     <button 
                         type="button" 
-                        class="btn btn-success"
-                        onclick="return filterReportNameActivity()"
+                        class="btn btn-warning"
+                        onclick="return filterTableNameActivity()"
                     >
-                        <i class="fa fa-download"></i> Generar
+                        <i class="fa fa-search"></i> Buscar
                     </button>
                 </div>
             </div>
+            <!-- Sample table of names of people if requested -->
+            @include('report/tableNameActivityFilterReportView')
         </div>
         <!-- Show space to filter by date -->
         <div id="filterDate" hidden="">
@@ -101,7 +103,7 @@
                         class="btn btn-warning"
                         onclick="return filterTablePersonName()"
                     >
-                    <i class="fa fa-user"></i> Buscar
+                    <i class="fa fa-search"></i> Buscar
                         
                     </button>
                 </div>

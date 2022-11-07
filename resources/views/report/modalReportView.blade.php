@@ -5,6 +5,11 @@
         <script src="js/report/reportFunctions.js"></script>
     </head>
     <body>
+        <!-- Charge loading animation form -->
+        <div class="loading" id="loadingByRep" hidden="">
+            <div class="loader-outter"></div>
+            <div class="loader-inner"></div>
+        </div>
         <!-- Show the modal report -->
         <div class="portfolio-modal modal fade" id="reportSectionModal0" tabindex="-1" role="dialog" aria-labelledby="#reportSectionModal0Label" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">

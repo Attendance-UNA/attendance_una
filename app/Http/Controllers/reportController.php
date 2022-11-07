@@ -32,12 +32,36 @@ class reportController extends Controller
     }
 
     /**
+     * Get the activity data and send it to present in a table
+     */
+    public function requestTableNameActivity(Request $request) {
+        $message = '';
+        $success = true;
+        $namesActivities = [];
+
+        // Get the date provided by the ajax
+        $nameActivity = $request::get('nameActivity');
+
+        $namesActivities = DB::table('tbactivity')->where('name', $nameActivity)->get();
+
+        if(sizeof($namesActivities) == 0){
+            $success = false;
+            $message = 'No existen actividades regitradas con el nombre ingresado';
+        }
+
+        // Send data by json to javascript ajax
+        $arrayInfo = array();
+        $arrayInfo = array("data" => $namesActivities, "message" => $message, "success" => $success);
+        echo json_encode($arrayInfo);
+    }
+
+    /**
      * Gets the necessary information from the activity name
      */
     public function requestDataNameActivity(Request $request) {
         $message = '';
         $success = false;
-        $nameActivity = $request::get('nameActivity'); // Get the activity name provided by the ajax
+        $idActivity = $request::get('idActivity'); // Get the activity name provided by the ajax
 
         $attendance = '';
         $activityData  = '';
@@ -46,7 +70,7 @@ class reportController extends Controller
         $finalArrayAttendance= array();
         
         // Extract the data of the queried activity
-        $activity = DB::table('tbactivity')->where('name', $nameActivity)->get();
+        $activity = DB::table('tbactivity')->where('id', $idActivity)->get();
         
         if(sizeof($activity) != 0) { // Continue if query contains data
 

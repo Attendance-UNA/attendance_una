@@ -28,34 +28,46 @@ function showFilterTypeReport () {
     switch (typeReport) {
         case "nameActivity":
             document.getElementById('filterNameActivity').hidden = false;
+            document.getElementById('tableActivityListReport').hidden = true;
             document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNamePerson').hidden = true;
             document.getElementById('filterIdPerson').hidden = true;
             document.getElementById('filterDate').hidden = true;
+            document.getElementById("nameActivity").value = '';
         break;
         case "date":
             document.getElementById('filterDate').hidden = false;
+            document.getElementById('tableActivityListReport').hidden = true;
             document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNameActivity').hidden = true;
             document.getElementById('filterNamePerson').hidden = true;
             document.getElementById('filterIdPerson').hidden = true;
+            document.getElementById("dateReport").value = '';
         break;
         case "namePerson":
             document.getElementById('filterNamePerson').hidden = false;
+            document.getElementById('tableActivityListReport').hidden = true;
+            document.getElementById('tableActivityListReport').hidden = true;
             document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNameActivity').hidden = true;
             document.getElementById('filterIdPerson').hidden = true;
             document.getElementById('filterDate').hidden = true;
+            document.getElementById("firstNamePerson").value = '';
+            document.getElementById("firstLastNamePerson").value = '';
+            document.getElementById("secondLastNamePerson").value = '';
         break;
         case "idPerson":
             document.getElementById('filterIdPerson').hidden = false;
+            document.getElementById('tableActivityListReport').hidden = true;
             document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNameActivity').hidden = true;
             document.getElementById('filterNamePerson').hidden = true;
             document.getElementById('filterDate').hidden = true;
+            document.getElementById("idPerson").value = '';
         break;
         default:
             document.getElementById('filterIdPerson').hidden = true;
+            document.getElementById('tableActivityListReport').hidden = true;
             document.getElementById('tablePersonListReport').hidden = true;
             document.getElementById('filterNameActivity').hidden = true;
             document.getElementById('filterNamePerson').hidden = true;
@@ -71,22 +83,25 @@ function deleteGarbageReportPDF() {
     $.ajax({
         type: "GET",
         url: 'report/deleteGarbageReportPDF',
-        success: function(){ }
+        success: function(){
+            document.getElementById('loadingByRep').hidden = true;
+        }
     });
 }
 
 /**
- * Extract the information required by the filtered activity name
+ * Filter entered activity names and put them in a table
  */
-function filterReportNameActivity () {
+function filterTableNameActivity() {
+    document.getElementById('tableActivityListReport').hidden = true;
     var nameActivity = document.getElementById('nameActivity').value // Extract the name of the activity
     if(nameActivity !== ''){ // Check that it does not come empty
-        const formData = new FormData();        
-        formData.append('nameActivity', nameActivity); // Store the data to send it to controller
-
+        const formData = new FormData(); 
+        formData.append('nameActivity', nameActivity);
+        
         $.ajax({
             type: "POST",
-            url: 'report/requestDataNameActivity', // Communicates with the web.php class
+            url: 'report/requestTableNameActivity', // Communicates with the web.php class
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             data: formData,
             contentType: false,
@@ -95,20 +110,77 @@ function filterReportNameActivity () {
             success: function(response){
                 if(response.success){
                     // Once it obtains the data, it sends them to print the report
-                    printReportNameActivity(response.data, response.activityData, nameActivity);
+                    createTableDataActivityName(response.data)
                 }else{
-                    swal(response.message,"Verifique que el nombre este bien escrito","warning",{button: "Ok"});
+                    swal(response.message,"","warning",{button: "Ok"});
                 }
             },
             error: function() { 
                 //document.getElementById('loadingBySub').hidden = true;
                 //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
-                console.log('Error en reporte nombre actividad');
+                console.log('Algo esta fallando en seccion nombre actividad');
             }
         });
     }else{
-        swal("¡Por favor llene el espacio de Actividad!","","warning",{button: "Ok"});
+        swal("¡Por favor llene el espacio de nombre actividad!","","warning",{button: "Ok"});
     }
+}
+
+/**
+ * Design and create the table with the activities
+ */
+function createTableDataActivityName(dataActivityNames) {
+    var table = document.querySelector("#table_list_complemet_name_activity");
+    var response = dataActivityNames;
+    var stringTableBody = "";
+
+    document.getElementById('tableActivityListReport').hidden = false;
+
+    table.innerHTML = '';
+    for(var i = 0; i < response.length; i++){
+        stringTableBody += '<tr>';
+        stringTableBody += '<td>' + response[i].name + '</td>';
+        stringTableBody += '<td>' + response[i].date + '</td>';
+        stringTableBody += '<td>' + response[i].description + '</td>';
+        stringTableBody += '<td>' + response[i].manager + '</td>';
+        stringTableBody += '<td><button onclick="filterReportNameActivity(`' + response[i].id + '`, `'+ response[i].name +'`)" class="btn btn-success"><i class="fa fa-download"></i> Generar</button></td>';
+        stringTableBody += '</tr>';
+    }
+    table.innerHTML = stringTableBody;
+}
+
+/**
+ * Extract the information required by the filtered activity name
+ */
+function filterReportNameActivity (idActivity, nameActivity) {
+    // Activate animation loading send data
+    document.getElementById('loadingByRep').hidden = false;
+
+    const formData = new FormData();        
+    formData.append('idActivity', idActivity); // Store the data to send it to controller
+
+    $.ajax({
+        type: "POST",
+        url: 'report/requestDataNameActivity', // Communicates with the web.php class
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: 'JSON',
+        success: function(response){
+            if(response.success){
+                // Once it obtains the data, it sends them to print the report
+                printReportNameActivity(response.data, response.activityData, nameActivity);
+            }else{
+                document.getElementById('loadingByRep').hidden = true;
+                swal(response.message,"Verifique que el nombre este bien escrito","warning",{button: "Ok"});
+            }
+        },
+        error: function() {
+            document.getElementById('loadingByRep').hidden = true; 
+            console.log('Error en reporte nombre actividad');
+        }
+    });
 }
 
 /**
@@ -140,6 +212,7 @@ function filterReportNameActivity () {
             deleteGarbageReportPDF(); // Remove generated garbage from created report
         },
         error: function(){
+            document.getElementById('loadingByRep').hidden = true;
             console.log('Error al generar reporte por nombre actividad');
         }
     });
@@ -151,6 +224,9 @@ function filterReportNameActivity () {
 function filterReportDate() {
     var date = document.getElementById('dateReport').value
     if(date !== ''){
+        // Activate animation loading send data
+        document.getElementById('loadingByRep').hidden = false;
+
         const formData = new FormData();        
         formData.append('date', date);
 
@@ -167,12 +243,12 @@ function filterReportDate() {
                     // Once it obtains the data, it sends them to print the report
                     printReportDate(response.data, date);
                 }else{
+                    document.getElementById('loadingByRep').hidden = true;
                     swal(response.message,"Verifique que la fecha este correcta","warning",{button: "Ok"});
                 }
             },
-            error: function() { 
-                //document.getElementById('loadingBySub').hidden = true;
-                //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
+            error: function() {
+                document.getElementById('loadingByRep').hidden = true;
                 console.log('Error en reporte por fecha');
             }
         });
@@ -211,6 +287,7 @@ function printReportDate(attendanceData, date) {
             deleteGarbageReportPDF(); // Remove generated garbage from created report
         },
         error: function(){
+            document.getElementById('loadingByRep').hidden = true;
             console.log('Error al generar reporte por fecha');
         }
     });
@@ -222,6 +299,9 @@ function printReportDate(attendanceData, date) {
 function filterReportIdPerson() {
     var idPerson = document.getElementById('idPerson').value
     if(idPerson !== ''){
+        // Activate animation loading send data
+        document.getElementById('loadingByRep').hidden = false;
+
         const formData = new FormData();        
         formData.append('idPerson', idPerson);
 
@@ -238,12 +318,12 @@ function filterReportIdPerson() {
                     // Once it obtains the data, it sends them to print the report
                     printReportPerson(response.person, response.attendance);
                 }else{
+                    document.getElementById('loadingByRep').hidden = true;
                     swal(response.message,"","warning",{button: "Ok"});
                 }
             },
             error: function() { 
-                //document.getElementById('loadingBySub').hidden = true;
-                //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
+                document.getElementById('loadingByRep').hidden = true;
                 console.log('Error en reporte cedula persona');
             }
         });
@@ -282,6 +362,7 @@ function printReportPerson(personData, attendanceData) {
             deleteGarbageReportPDF(); // Remove generated garbage from created report
         },
         error: function(){
+            document.getElementById('loadingByRep').hidden = true;
             console.log('Error al generar reporte por persona');
         }
     });
@@ -359,6 +440,9 @@ function createTableDataPersonName(dataPersonsNames) {
  * Obtains the attendance data of the selected person
  */
 function filterReportNamePerson(idPerson) {
+    // Activate animation loading send data
+    document.getElementById('loadingByRep').hidden = false;
+
     const formData = new FormData();        
     formData.append('idPerson', idPerson);
 
@@ -375,12 +459,12 @@ function filterReportNamePerson(idPerson) {
                 // Once it obtains the data, it sends them to print the report
                 printReportPerson(response.person, response.attendance);
             }else{
+                document.getElementById('loadingByRep').hidden = true;
                 swal(response.message,"","warning",{button: "Ok"});
             }
         },
         error: function() { 
-            //document.getElementById('loadingBySub').hidden = true;
-            //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
+            document.getElementById('loadingByRep').hidden = true; 
             console.log('Algo esta fallando en seccion cedula persona');
         }
     });

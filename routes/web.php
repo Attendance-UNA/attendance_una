@@ -51,6 +51,8 @@ Route::post('subcategory/update', [SubcategoryController::class, 'updateSubcateg
 /**
  * Section routes by reports
  */
+Route::post('report/requestTableNameActivity', [reportController::class, 'requestTableNameActivity']);
+
 Route::post('report/requestDataNameActivity', [reportController::class, 'requestDataNameActivity']);
 
 Route::post('report/printReportNameActivity', [reportController::class, 'printReportNameActivity']);
