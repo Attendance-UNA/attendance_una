@@ -29,8 +29,9 @@ Route::get('/', function () {
 Route::post('startActivity', 'App\Http\Controllers\activityController@startActivity');
 //route for scan code view
 Route::get('/scancode', function () {
-    return view('scanningQR');
+    return view('activity/scanningQR');
 });
+
 //route for guests dinamic table 
 Route::get('guestsTable', 'App\Http\Controllers\activityController@guestsTableControl');
 
@@ -50,8 +51,16 @@ Route::post('activitysubcategory/getlist', 'App\Http\Controllers\activityControl
 //route for get activity list 
 Route::post('activities/getlist', 'App\Http\Controllers\activityController@activitiesList');
 
+//route for get Activity Started datas
+Route::post('activities/getActivityStartedById', 'App\Http\Controllers\activityController@getActivityStartedById');
+
+//route for get Activity x id datas
+Route::post('activities/getActivityById', 'App\Http\Controllers\activityController@getActivityById');
+
 //route for post activity insert  
 Route::post('activity/insert', [activityController::class, 'insertActivity']);
+//route for post activity update  
+Route::post('activity/update', [activityController::class, 'updateActivity']);
 // --------------------------END ACTIVITIES ROUTES-----------------------------------
 /**
  *  Section routes by subcategory

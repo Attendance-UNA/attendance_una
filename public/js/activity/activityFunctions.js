@@ -56,8 +56,10 @@ function removeErrorInput() {
 function submitGuest() {
     var urlAction = "";
     var idGuestVar = document.getElementById("idGuest").value;
+    var idActivityVar = document.getElementById("idActivity").value;
+
     urlAction = "currentGuests/insert";
-    var data = { idGuest: idGuestVar };
+    var data = { idGuest: idGuestVar,idActivity:idActivityVar };
     $.ajax({
         type: "POST",
         url: urlAction,
@@ -149,14 +151,67 @@ function putCurrentGuests(guests,persons) {
     table.innerHTML = stringTableBody;
 }
 
+function startActivityGetData(id){ 
+    
+    var urlAction = "";
+    urlAction = "activities/getActivityStartedById";
+    var data = {idActivity: id};
+    
 
+    $.ajax({
+        type: "POST",
+        url: urlAction,
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        contentType: "application/json",
+        dataType: 'JSON',
+        data: JSON.stringify(data),
+        success: function(response){
+            if(response[0].success){
+                
+                document.getElementById('activityName').value=response[0].name; 
+                document.getElementById('idActivity').value=response[0].id; 
+                document.getElementById('activityDescription').value=response[0].description; 
+                document.getElementById('activityManagerName').value=response[0].manager; 
+                document.getElementById('startDataTimeLbl').innerHTML="Fecha y hora de inicio: "+response[0].date+" / "+response[0].startTime; 
+            }else{
+                swal({
+                    title: "¡Los sentimos, esta actividad contiene errores, intente de nuevo!",
+                    text: "",
+                    icon: "error",
+                    timer: 5000,
+                    button: "Ok"
+                 });
+                window.location.replace("/");
+            }
+        },
+        error: function() { 
+            swal({
+                    title: "¡Los sentimos, esta actividad contiene errores, intente de nuevo!",
+                    text: "",
+                    icon: "error",
+                    timer: 5000,
+                    button: "Ok"
+                 }).then(function() {
+                    
+                    window.location.replace("/");
+                    
+                  });
+            
+            
+        }
+    });
+
+}
 
 function initializerEventListener() {
     //if the page is ready we can fade out the loading
     $(document).ready(function () {
         //Loading animation control
         $(".loading").fadeOut(1000);
-
+        const parameters = new URLSearchParams(window.location.search);
+        const id = parameters.get('id');
+    
+        startActivityGetData(id);
         //Script for Html5QrcodeScanner use
         src = "/js/html5-qrcode.min.js";
         var lastResult, countResults = 0;
@@ -262,19 +317,13 @@ function getAllActivities() {
             table.innerHTML = '';
 
             for(var i = 1; i < response.length; i++){
-               
-                var params = {
-                    param1: response[i].id,
-                    param2: response[i].name,
-                    param3: response[i].manager
-                };
-
+            
                 stringTableBody += '<tr>';
                 stringTableBody += '<td>' + response[i].date + '</td>';
                 stringTableBody += '<td>' + response[i].name + '</td>';
                 stringTableBody += '<td>' + response[i].manager + '</td>';
-                stringTableBody += '<td><button onclick="editActivity(`' + response[i].id + '`)" class="btn btn-warning" disabled><i class="fas fa-pen fa-fw"></i> Editar</button></td>';
-                stringTableBody += '<td><button onclick="sendPost(`' + params + '`)" class="btn btn-primary"><i class="fas fa-pen fa-fw"></i> Iniciar</button></td>';
+                stringTableBody += '<td><button onclick="editActivity(`' + response[i].id + '`)" class="btn btn-warning" ><i class="fas fa-pen fa-fw"></i> Editar</button></td>';
+                stringTableBody += '<td><button onclick="startActivity(`' + response[i].id + '`)" class="btn btn-primary"><i class="fas fa-play fa-fw"></i> Iniciar</button></td>';
                 stringTableBody += '</tr>';
             }
             table.innerHTML = stringTableBody;
@@ -284,36 +333,10 @@ function getAllActivities() {
         }
     });
 }
-function sendPost(params){ 
-    var urlAction = "";
-    urlAction = "startActivity";
-
-    $.ajax({
-        type: "POST",
-        url: urlAction,
-        headers: {
-            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-        },
-        contentType: "application/json",
-        dataType: "JSON",
-        data: params,
-        contentType: false,
-        processData: false,
-
-        success: function (response) {           
-            console.log("¡Error al consultar subcategorias en la base de datos!")
-            
-        },
-        error: function (response) {
-            swal(
-                "¡Algo salió mal!",
-                "Recargue e intente de nuevo",
-                "error",
-                { button: "Ok" }
-            );
-        },
-    });
-
+function startActivity(id){    
+    if (id!= undefined && id != null) {
+        window.location = '/scancode?id=' + id;
+    }
 }
 /**
  * Check the spaces of the form before being sent to registration
@@ -369,7 +392,6 @@ function submitDataActivity(flagAction) {
          * Enter from this side to execute the [Edit] action
          */
         urlAction = 'activity/update';
-        formData.append('id_activity', document.getElementById('id_activity').value);
     }
 
     $.ajax({
@@ -403,19 +425,93 @@ function submitDataActivity(flagAction) {
  * Clear form fields after making a registration
  */
  function cleanFormSpacesActivity() {
+    //ALL by default
+    document.getElementById('idActivity').value = '';
+    document.getElementById('activityName').readOnly=false; 
     document.getElementById('activityName').value = '';
     document.getElementById('activityDescription').value = '';
+    document.getElementById('activityManagername').value= '';
+    document.getElementById('activityDate').value= '';
+    document.getElementById('btnUpdateActivity').hidden = true;
+    document.getElementById('btnCreateActivity').hidden = false;
+    $("#categoriesSubcategoriesSelectedTb").html("");
 }
 
 /**
- * Space to submit a change in the form to edit a subcategory
+ * Space to submit a change in the form to edit a activity
  */
-function editActivity(idActivity){
-
+function editActivity(id_activity){
+    cleanFormSpacesActivity();
     document.getElementById('btnUpdateActivity').hidden = false;
     document.getElementById('btnCreateActivity').hidden = true;
+    document.body.scrollTop = 0; // For Safari
+    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    document.getElementById('idActivity').value = id_activity;
 
-    document.getElementById('idActivity').value = idActivity;
+    var urlAction = "";
+    urlAction = "activities/getActivityById";
+    var data = {idActivity: id_activity};
+    
+
+    $.ajax({
+        type: "POST",
+        url: urlAction,
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        contentType: "application/json",
+        dataType: 'JSON',
+        data: JSON.stringify(data),
+        success: function(response){
+            if(response[0].success){
+
+                document.getElementById('idActivity').value=response[0].id; 
+                document.getElementById('activityName').value=response[0].name; 
+                document.getElementById('activityName').readOnly=true; 
+                document.getElementById('activityDescription').value=response[0].description 
+                document.getElementById('activityManagername').value=response[0].manager; 
+                document.getElementById('activityDate').value=response[0].date; 
+                //Charge  categories Selected in Tb
+                response[0].categories.forEach(element => {
+                    var list  = $("#categoriesSubcategoriesSelectedTb").html();
+                    newCategory= '<tr id="'+element.category+'"><td>' + element.category + '</td><td><button type="button" class="btn btn-danger" onclick="SomeDeleteRowFunction(this);">Quitar</button></td></tr>';
+                    $("#categoriesSubcategoriesSelectedTb").html(list+newCategory); //add to tb list of selections categories and subcategories
+
+                });
+                //Charge Subcategories Selected in Tb
+                response[0].subcategories.forEach(element => {
+                    var list  = $("#categoriesSubcategoriesSelectedTb").html();
+                    newSubCategory= '<tr id="'+element.id+'"><td>' + element.name + '</td><td><button type="button" class="btn btn-danger" onclick="SomeDeleteRowFunction(this);">Quitar</button></td></tr>';
+                    $("#categoriesSubcategoriesSelectedTb").html(list+newSubCategory); //add to tb list of selections categories and subcategories
+
+                });
+                //------------
+            }else{
+                swal({
+                    title: "¡Los sentimos, esta actividad contiene errores, intente de nuevo!",
+                    text: "",
+                    icon: "error",
+                    timer: 5000,
+                    button: "Ok"
+                    });
+                window.location.replace("/");
+            }
+        },
+        error: function() { 
+            swal({
+                    title: "¡Los sentimos, esta actividad contiene errores, intente de nuevo!",
+                    text: "",
+                    icon: "error",
+                    timer: 5000,
+                    button: "Ok"
+                    }).then(function() {
+                    
+                    window.location.replace("/");
+                    
+                    });
+            
+            
+        }
+    });
+    
     
 }
 
@@ -487,7 +583,8 @@ function addSubcategoryToListTb(){
         }else{
             var list  = $("#categoriesSubcategoriesSelectedTb").html();
             var newSubCategories=""; 
-            newSubCategories= '<tr id="'+id+'"><td>' + name + '</td></tr>';  
+            //newSubCategories= '<tr id="'+id+'"><td>' + name + '</td></tr>';  
+            newSubCategories= '<tr id="'+id+'"><td>' + name + '</td><td><button type="button" class="btn btn-danger" onclick="SomeDeleteRowFunction(this);">Quitar</button></td></tr>';
             subcategorySelected.options.selectedIndex=0;
             $("#categoriesSubcategoriesSelectedTb").html(list+newSubCategories);
         }
@@ -522,7 +619,9 @@ function addCategoryToListTb(){
         }else{
             var list  = $("#categoriesSubcategoriesSelectedTb").html();
             var newCategory=""; 
-            newCategory= '<tr id="'+id+'"><td>' + name + '</td></tr>';  
+            //newCategory= '<tr id="'+id+'"><td>' + name + '</td></tr>';
+            newCategory= '<tr id="'+id+'"><td>' + name + '</td><td><button type="button" class="btn btn-danger" onclick="SomeDeleteRowFunction(this);">Quitar</button></td></tr>';
+
             categorySelected.options.selectedIndex=0; //reset cbx to default selection
             $("#categoriesSubcategoriesSelectedTb").html(list+newCategory); //add to tb list of selections categories and subcategories
         }
@@ -539,6 +638,13 @@ function addCategoryToListTb(){
     }
     
 
+}
+function SomeDeleteRowFunction(btndel) {
+    if (typeof(btndel) == "object") {
+        $(btndel).closest("tr").remove();
+    } else {
+        return false;
+    }
 }
 //validate if this id category or id subcategory are in the tb list to this activity
 function validateCategorySubcategoryList(id){

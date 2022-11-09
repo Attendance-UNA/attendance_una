@@ -37,22 +37,23 @@
         </div>
         <div class="col-md-6">
           <h4>Escanee su c&oacute;digo QR para registrar su asistencia.</h4>
+          <input type="hidden" name="idActivity" class="form-control" id="idActivity" value="">
           <div class="form-group">
             <label for="activityName">Nombre de la actividad:</label>
-            <input type="text" name="activityName" class="form-control" id="activityName" value="{{$newActivity->name}}" readonly="true">
+            <input type="text" name="activityName" class="form-control" id="activityName" readonly="true">
           </div>
           <div class="form-group">
             <label for="activityDescription">Descripci&oacuten de la actividad:</label>
-            <input type="text" name="activityDescription" class="form-control" id="activityDescription" value="{{$newActivity->description}}" readonly="true">
+            <input type="text" name="activityDescription" class="form-control" id="activityDescription" readonly="true">
           </div>
           <div class="form-group">
             <label for="activityManagername">Nombre del encargado:</label>
-            <input type="text" name="activityManagername" class="form-control" id="activityManagername" value="{{$newActivity->manager}}" readonly="true">
+            <input type="text" name="activityManagerName" class="form-control" id="activityManagerName"readonly="true">
           </div>
           <div class="form-group">
-            <label>Fecha y Hora de Inicio: {{$newActivity->date}} {{$newActivity->startTime}}</label>
-            <input type="hidden" name="activityDate" class="form-control" id="activityDate" value="{{$newActivity->date}}" readonly="true">
-            <input type="hidden" name="activityStartTime" class="form-control" id="activityStartTime" value="{{$newActivity->startTime}}" readonly="true">
+            <label id="startDataTimeLbl" value=""> </label>
+            <input type="hidden" name="activityDate" class="form-control" id="activityDate" readonly="true">
+            <input type="hidden" name="activityStartTime" class="form-control" id="activityStartTime" readonly="true">
             <input type="hidden" name="idGuest" class="form-control" id="idGuest" value="">
           </div>
         </div>
