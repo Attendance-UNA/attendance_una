@@ -79,7 +79,7 @@ class uploadPersonController extends Controller
                                 DB::table('tbsubcategory_person')->upsert(
                                     $subcategoriesToInsert,
                                     ['idperson', 'idsubcategory'],
-                                    ['idperson', 'idsubcategory']
+                                    ['status']
                                 );
                                 DB::commit();
                                 $messageType = 'success';
