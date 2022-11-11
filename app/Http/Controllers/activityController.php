@@ -16,12 +16,17 @@ class activityController extends Controller
 {
     //function for receive the New Activity data
     public function getActivityStartedById(Request $request){
-        $activities= DB::table('tbactivity')->where('id','LIKE',$request::get('idActivity'))->get();
+        $idActivity=$request::get('idActivity');
+
+        $activities= DB::table('tbactivity')->where('id','LIKE',$idActivity)->get();
+
+        $guestsInThisActivity= DB::table('tbactivity_person')->where('id_activity','LIKE',$idActivity)->get();
 
         $arrayInfo = array();
         if(count($activities)==0){
             array_push($arrayInfo, array("success"=>false,"msj"=>$activities));
         }else{
+
             $today = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
             $today =date_format($today, 'Y-m-d');
 
@@ -29,9 +34,20 @@ class activityController extends Controller
             $dateFormat =date_format($dateScheduled, 'Y-m-d');
 
             if ($today == $dateFormat) {
-                $hour = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
-                $hour = $hour->format("h:i A");
-    
+                if(count($guestsInThisActivity)>0){
+                    $hour=$activities[0]->start_time;
+                    $hour = new DateTime($hour, new DateTimeZone("America/Costa_Rica"));
+                    $hour = $hour->format("h:i A");
+                }else{
+                    $hour = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
+                    
+                    $hourToDB = $hour->format("h:i:m");
+                    DB::table('tbactivity')->where('id', $idActivity)->update(
+                        ['start_time' => $hourToDB]
+                    );
+                    $hour = $hour->format("h:i A");
+                }
+
                 array_push($arrayInfo, array("success"=>true,"id"=>$activities[0]->id,"name"=>$activities[0]->name,
                 "date"=>$activities[0]->date,'startTime'=>$hour,"manager"=>$activities[0]->manager,'description'=>$activities[0]->description));
         
@@ -103,7 +119,7 @@ class activityController extends Controller
             $activityGuests->idActivity = $idActivity;
             $activityGuests->idPerson = $idGuest;
             $activityGuests->entryHour = $currentHour;
-            
+
             try{
                 DB::beginTransaction();
                 if (DB::table('tbactivity_person')->where('id_activity', $activityGuests->idActivity)->where('id_person', $activityGuests->idPerson)->exists()) {
@@ -112,6 +128,9 @@ class activityController extends Controller
                 } else if (DB::table('tbperson')->where('id', $activityGuests->idPerson)->doesntExist()) {
                     $message="Codigo QR no válido";
 
+                }else if(!$this->validateCategorySubCategory($idGuest,$idActivity)){
+
+                    $message="No se encuentra dentro de las categorías invitadas a esta actividad";
                 }else{
                     DB::insert(
                         "insert into tbactivity_person (id_activity,id_person,entry_hour) values (?, ?, ?)",
@@ -158,24 +177,41 @@ class activityController extends Controller
     }
 
     public function validateCategorySubCategory($idGuest,$idActivity){
-
-        //get only this guests subcategories
-        $guest_subcategories = DB::table('tbsubcategory_person')->where('idperson','LIKE',$idGuest)->get('idsubcategory');
+        //response
+        $success=false;
+        //get only category for this guest
+        $guest_category = DB::table('tbperson')->where('id','LIKE',$idGuest)->get('category');
+        
+        //get only this subcategories's guest
+        $guest_subcategories = DB::table('tbsubcategory_person')->where('idperson','LIKE',$idGuest)->get();
         //get only this activity's subcategories
-        $activity_subcategories = DB::table('tbactivity_subcategory')->where('id_activity','LIKE',$idActivity)->get('id_subcategory');
-
-        if($guest_subcategories!=null){
-            //get persons data
-            foreach ($guest_subcategories as $currentGuest) {
-                $currentId= $currentGuest->id_person;
-                $currentPerson =DB::table('tbperson')->where('id','LIKE',$currentId)->get();
-                
-                array_push($currentPersons,$currentPerson);
+        $activity_subcategories = DB::table('tbactivity_subcategory')->where('id_activity','LIKE',$idActivity)->get();
+        
+        //get only this activity's categories
+        $activity_categories = DB::table('tbactivity_category')->where('id_activity','LIKE',$idActivity)->get('category');
+        
+        if($guest_category!=null){
+            //validate category
+            foreach ($activity_categories as $activity_category) {
+                if($guest_category[0]==$activity_category){
+                    $success=true;
+                }
             }
-            $success=true;
-
         }
+        if($guest_subcategories!=null && $activity_subcategories!=null && !$success) {
+                //validate subcategory
+            foreach ($guest_subcategories as $guest_subcategory) {      
+                foreach ($activity_subcategories as $activity_subcategory) {
 
+                    if($guest_subcategory->idsubcategory==$activity_subcategory->id_subcategory){
+                        $success=true;
+                    }
+                }
+            }
+
+        }      
+
+        return $success;
     }
 
     //get guests by an activity

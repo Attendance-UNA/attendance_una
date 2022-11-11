@@ -85,7 +85,7 @@ function submitGuest() {
                     title: "¡" + response.message + "!",
                     text: "",
                     icon: "error",
-                    timer: 2000,
+                    timer: 3000,
                     button: "Ok"
                  });
             }
@@ -93,7 +93,7 @@ function submitGuest() {
         error: function (response) {
             swal(
                 "¡Algo salió mal!",
-                "Recargue e intente de nuevo" + idGuest,
+                "Recargue e intente de nuevo",
                 "error",
                 { button: "Ok" }
             );
