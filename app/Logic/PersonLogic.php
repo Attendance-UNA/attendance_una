@@ -31,10 +31,12 @@ class PersonLogic
             $subcategoriesAux = $people[$i]->subcategories;
             if (is_array($subcategoriesAux) == true && count($subcategoriesAux) > 1){
                 for ($j = 0; $j < count($subcategoriesAux); $j++){
-                    array_push($subcategoriesToInsert, ["idperson"=>$people[$i]->id, "idsubcategory"=>$subcategoriesAux[$j]]);
+                    $subcategorySplit = explode(":", $subcategoriesAux[$j]);
+                    array_push($subcategoriesToInsert, ["idperson"=>$people[$i]->id, "idsubcategory"=>$subcategorySplit[0], "status"=>$subcategorySplit[1]]);
                 }
             }else{
-                array_push($subcategoriesToInsert, ["idperson"=>$people[$i]->id, "idsubcategory"=>$subcategoriesAux[0]]);
+                $subcategorySplit = explode(":", $subcategoriesAux[0]);
+                array_push($subcategoriesToInsert, ["idperson"=>$people[$i]->id, "idsubcategory"=>$subcategorySplit[0], "status"=>$subcategorySplit[1]]);
             }
         }
         return $subcategoriesToInsert;
@@ -86,7 +88,12 @@ class PersonLogic
     public function checkSubcategories($subcategories, $dbsubcategories){
         $flag = true;
         for ($i = 0; $i < count($subcategories); $i++){
-            (in_array($subcategories[$i], $dbsubcategories))?null:$flag = false;
+            $subcategoryAndStatus = explode(":", $subcategories[$i]);
+            if (count($subcategoryAndStatus) == 2 && strlen($subcategoryAndStatus[0]) > 0 && strlen($subcategoryAndStatus[1]) > 0){
+                (in_array($subcategoryAndStatus[0], $dbsubcategories))?null:$flag = false; 
+            }else{
+                $flag = false;
+            }
             if ($flag == false){
                 $i = count($subcategories);
             }
