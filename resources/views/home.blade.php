@@ -39,7 +39,7 @@
         <div class="container">
             <!-- newActivity Section Heading-->
             <div class="text-center">
-                <h2 class="page-section-heading text-secondary mb-0 d-inline-block">Iniciar una nueva Actividad</h2>
+                <h2 class="page-section-heading text-secondary mb-0 d-inline-block">Gestionar/Iniciar Actividades</h2>
             </div>
             <!-- Icon Divider-->
             <div class="divider-custom">
@@ -50,8 +50,8 @@
             <!-- newActivity Grid Items-->
             <div class="row justify-content-center">
                 <!-- newActivity Items-->
-                <div class="col-md-6 col-lg-4 mb-5">
-                    <div class="portfolio-item mx-auto" data-toggle="modal" data-target="#newActivityModal0">
+                <div class="col-md-6 col-lg-4 mb-5" >
+                    <div class="portfolio-item mx-auto" data-toggle="modal" onclick="location.href ='createactivities'" >
                         <div class="portfolio-item-caption d-flex align-items-center justify-content-center h-100 w-100">
                             <div class="portfolio-item-caption-content text-center text-white"><i class="fas fa-plus fa-3x"></i></div>
                         </div><img class="img-fluid" src="assets/img/attendanceUNA/meeting.png" alt="Log Cabin" />
@@ -62,90 +62,9 @@
         </div>
     </section>
     @include('person/sectionPersonView')
-        <!-- Section view subcategory portfolio -->
-        @include('subcategory/sectionSubcategoryView')
-    <!-- new activity Modal-->
-    <div class="portfolio-modal modal fade" id="newActivityModal0" tabindex="-1" role="dialog" aria-labelledby="#newActivityModal0Label" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"><i class="fas fa-times"></i></span></button>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row justify-content-center text-center">
-                            <div class="col-lg-10">
-                                <!-- new activity Modal - Title-->
-                                <h2 class="portfolio-modal-title text-secondary mb-0">Datos de la Actividad</h2>
-                                <!-- Icon Divider-->
-                                <div class="divider-custom">
-                                    <div class="divider-custom-line"></div>
-                                    <div class="divider-custom-icon"><i class="fas fa-circle"></i></div>
-                                    <div class="divider-custom-line"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <form action="{{url('startActivity')}}" method="post">
-                            @csrf
-                            <div class="row justify-content-center">
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label for="activityName">Nombre de la actividad:</label>
-                                        <input type="text" name="activityName" class="form-control" id="activityName" aria-describedby="nameHelp" placeholder="Ingrese el nombre de la actividad">
-                                        <!-- <small id="nameHelp" class="form-text text-muted">Una pequeña descripcion de la actividad.</small> -->
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="activityDescription">Descripci&oacuten de la actividad:</label>
-                                        <input type="text" name="activityDescription"  class="form-control" id="activityDescription" placeholder="Ingrese una descripción acerca de la actividad">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="activityManagername">Nombre del encargado:</label>
-                                        <input type="text" name="activityManagername" class="form-control" id="activityManagername" placeholder="Ingrese el nombre completo">
-                                    </div>
-                                    <label for="activityName">Seleccione la(s) categor&iacutea(s) de asistentes:</label>
-                                    <div class="form-check">
-                                        <input type="checkbox" name="categoryCheck1" class="form-check-input" id="categoryCheck1">
-                                        <label class="form-check-label" for="categoryCheck1">Administrativos</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" name="categoryCheck2" class="form-check-input" id="categoryCheck2">
-                                        <label class="form-check-label" for="categoryCheck2">Ac&aacutedemicos</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" name="categoryCheck3" class="form-check-input" id="categoryCheck3">
-                                        <label class="form-check-label" for="categoryCheck3">Estudiantes</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" name="categoryCheck4" class="form-check-input" id="categoryCheck4">
-                                        <label class="form-check-label" for="categoryCheck4">Invitados</label>
-                                    </div>
+    <!-- Section view subcategory portfolio -->
+    @include('subcategory/sectionSubcategoryView')
 
-
-                                </div>
-
-                                <div class="col-lg-4">
-                                    <label for="activityName">Seleccione la(s) subcategor&iacutea(s) de asistentes:</label>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="subCategoryCheck">
-                                        <label class="form-check-label" for="subCategoryCheck">Comisi&oacuten de emergencias</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="subCategoryCheck">
-                                        <label class="form-check-label" for="subCategoryCheck">Estudiantes becados con ingreso en el 2022 Carrera de Informatica</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row justify-content-end">
-
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-check-circle"></i> Iniciar </button>
-
-                                <button class="btn btn-danger" href="#" style="margin-left: 10px" data-dismiss="modal"><i class="fas fa-times fa-fw"></i>Cancelar</button>
-
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- modal import person list-->
     @include('person/modalPersonView')
         <!-- subcategory section Modal-->

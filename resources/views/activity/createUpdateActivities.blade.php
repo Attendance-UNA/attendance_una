@@ -52,7 +52,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-6">
                 
-                    <input type="text" name="idActivity" class="form-control" id="idActivity" hidden="true">
+                    <input type="hidden" name="idActivity" class="form-control" id="idActivity" value="">
                     <div class="form-group" id="div-activityName">
                         <label for="activityName">Nombre de la actividad:</label>
                         <input type="text" name="activityName" class="form-control" id="activityName" aria-describedby="nameHelp" placeholder="Ingrese el nombre de la actividad" required>
@@ -68,7 +68,7 @@
                     </div>
                     <div class="form-group" id="div-activityDate">
                         <label for="activityDate">Fecha de la actividad:</label>
-                        <input type="date" id="activityDate" name="activityDate" min="<?= date('Y-m-d'); ?>" required>
+                        <input type="date" id="activityDate" name="activityDate" min="<?= date('Y-m-d');?>" required>
                     </div>
                         <label for="categoryActivitySelect">Categor&iacute;as para incluir en esta actividad:</label>
                         <select id="categoryActivitySelect" class="custom-select">
@@ -107,10 +107,10 @@
 
             <div class="row justify-content-center">
 
-                <button type="button" id="btnCreateActivity" class="btn btn-primary" onclick="validateSubmitActivity(true)"><i class="fas fa-plus-square"></i> Guardar </button>
+                <button type="button" id="btnCreateActivity" class="btn btn-primary" onclick="validateSubmitActivity(true)"><i class="fas fa-folder-plus"></i> Guardar </button>
                 <button type="button" id="btnUpdateActivity" class="btn btn-primary" onclick="validateSubmitActivity(false)" hidden=""><i class="fas fa-check-square"></i> Actualizar </button>
                
-                <button type="button" class="btn btn-danger" style="margin-left: 10px" onclick="window.location='/'" ><i class="fas fa-times fa-fw"></i>Cancelar</button>
+                <button type="button" class="btn btn-danger" style="margin-left: 10px" onclick="window.location.reload()" ><i class="fas fa-times fa-fw"></i>Cancelar</button>
 
             </div>
         </form>
