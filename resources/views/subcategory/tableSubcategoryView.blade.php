@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <link rel="stylesheet" href="css/table_style.css">
+    </head>
     <body>
         <div class="card">
             <div class="card-header">
@@ -23,28 +26,3 @@
         </div>
     </body>
 </html>
-
-<style>
-    .table-wrapper {
-        width: 100%;
-        height: 300px; /* Altura de ejemplo */
-        overflow: auto;
-    }
-
-    .table-wrapper table {
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    .table-wrapper table thead {
-        position: -webkit-sticky; /* Safari... */
-        position: sticky;
-        top: 0;
-        left: 0;
-    }
-
-    .table-wrapper table thead th,
-    .table-wrapper table tbody td {
-        background-color: #FFF;
-    }
-</style>

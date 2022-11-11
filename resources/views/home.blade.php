@@ -64,11 +64,15 @@
     @include('person/sectionPersonView')
     <!-- Section view subcategory portfolio -->
     @include('subcategory/sectionSubcategoryView')
+    <!-- Section view report portfolio -->
+    @include('report/sectionReportView')
 
     <!-- modal import person list-->
     @include('person/modalPersonView')
-        <!-- subcategory section Modal-->
-        @include('subcategory/modalSubcategoryView')
+    <!-- subcategory section Modal-->
+    @include('subcategory/modalSubcategoryView')
+    <!-- report section Modal-->
+    @include('report/modalReportView')
 
     <!-- include general footer blade-->
     @include('mainFooter')

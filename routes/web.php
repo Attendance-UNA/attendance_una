@@ -3,6 +3,7 @@ use App\Http\Controllers\example_controller;
 use App\Http\Controllers\activityController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SubcategoryController;
+use App\Http\Controllers\reportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,3 +85,24 @@ Route::post('subcategory/insert', [SubcategoryController::class, 'insertSubcateg
 Route::get('subcategory/getdata', [SubcategoryController::class, 'getSubcategories']);
 
 Route::post('subcategory/update', [SubcategoryController::class, 'updateSubcategory']);
+
+/**
+ * Section routes by reports
+ */
+Route::post('report/requestTableNameActivity', [reportController::class, 'requestTableNameActivity']);
+
+Route::post('report/requestDataNameActivity', [reportController::class, 'requestDataNameActivity']);
+
+Route::post('report/printReportNameActivity', [reportController::class, 'printReportNameActivity']);
+
+Route::post('report/requestDataDate', [reportController::class, 'requestDataDate']);
+
+Route::post('report/printReportDate', [reportController::class, 'printReportDate']);
+
+Route::post('report/requestDataPerson', [reportController::class, 'requestDataPerson']);
+
+Route::post('report/printReportPerson', [reportController::class, 'printReportPerson']);
+
+Route::post('report/requestTableDataPerson', [reportController::class, 'requestTableDataPerson']);
+
+Route::get('report/deleteGarbageReportPDF', [reportController::class, 'deleteGarbageReportPDF']);
