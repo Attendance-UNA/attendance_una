@@ -81,10 +81,10 @@ class uploadPersonController extends Controller
                                     ['idperson', 'idsubcategory'],
                                     ['status']
                                 );
-                                DB::commit();
                                 $messageType = 'success';
                                 $message = "¡Datos importados correctamente! Resultados: {$counters["inserted"]} datos registrados y {$counters["updated"]} datos existentes actualizados";
                                 $fileName = $qrLogic->writeQrCodeInDoc($people);
+                                DB::commit();
                             }catch(\Exception $e){
                                 DB::rollBack();
                                 $messageType = "error";
