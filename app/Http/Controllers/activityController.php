@@ -22,13 +22,24 @@ class activityController extends Controller
         if(count($activities)==0){
             array_push($arrayInfo, array("success"=>false,"msj"=>$activities));
         }else{
-            
-            $hour = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
-            $hour = $hour->format("h:i A");
+            $today = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
+            $today =date_format($today, 'Y-m-d');
 
-            array_push($arrayInfo, array("success"=>true,"id"=>$activities[0]->id,"name"=>$activities[0]->name,
-            "date"=>$activities[0]->date,'startTime'=>$hour,"manager"=>$activities[0]->manager,'description'=>$activities[0]->description));
+            $dateScheduled = date_create($activities[0]->date);
+            $dateFormat =date_format($dateScheduled, 'Y-m-d');
+
+            if ($today == $dateFormat) {
+                $hour = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
+                $hour = $hour->format("h:i A");
     
+                array_push($arrayInfo, array("success"=>true,"id"=>$activities[0]->id,"name"=>$activities[0]->name,
+                "date"=>$activities[0]->date,'startTime'=>$hour,"manager"=>$activities[0]->manager,'description'=>$activities[0]->description));
+        
+            }else{
+                array_push($arrayInfo, array("success"=>false,"msj"=>"La fecha programada para esta reunion no coincide con la actual"));
+            }
+            
+
         }
         
         return response()->json($arrayInfo);
@@ -135,7 +146,75 @@ class activityController extends Controller
             
         
         }else{
-            $message="cedula vacia";
+            $message="id vacia";
+        }
+
+        // Send data by json to javascript ajax
+        $arrayResponse=array();
+        $arrayResponse=array("success"=> $success, "message"=>$message,"currentGuests"=>$currentGuests,"currentPersons"=>$currentPersons);
+        echo json_encode($arrayResponse);
+
+
+    }
+
+    public function validateCategorySubCategory($idGuest,$idActivity){
+
+        //get only this guests subcategories
+        $guest_subcategories = DB::table('tbsubcategory_person')->where('idperson','LIKE',$idGuest)->get('idsubcategory');
+        //get only this activity's subcategories
+        $activity_subcategories = DB::table('tbactivity_subcategory')->where('id_activity','LIKE',$idActivity)->get('id_subcategory');
+
+        if($guest_subcategories!=null){
+            //get persons data
+            foreach ($guest_subcategories as $currentGuest) {
+                $currentId= $currentGuest->id_person;
+                $currentPerson =DB::table('tbperson')->where('id','LIKE',$currentId)->get();
+                
+                array_push($currentPersons,$currentPerson);
+            }
+            $success=true;
+
+        }
+
+    }
+
+    //get guests by an activity
+    public function getGuestsByActivityId(Request $request){
+        $idActivity=$request::get('idActivity');
+        $success=false;
+        $message="No se pudo obtener datos";
+        $currentGuests=null;
+        $currentPersons=array();
+
+        if($idActivity!=null){
+            
+            $activityGuests = new ActivityGuests();
+            
+            $activityGuests->idActivity = $idActivity;
+            
+            try{
+                //get only this activity's guests
+                $currentGuests = DB::table('tbactivity_person')->where('id_activity','LIKE',$activityGuests->idActivity)->orderBy('created_at','desc')->get();
+                if($currentGuests!=null){
+                    //get persons data
+                    foreach ($currentGuests as $currentGuest) {
+                        $currentId= $currentGuest->id_person;
+                        $currentPerson =DB::table('tbperson')->where('id','LIKE',$currentId)->get();
+                        
+                        array_push($currentPersons,$currentPerson);
+                    }
+                    $success=true;
+
+                }
+
+            }catch(Exception $e){
+                DB::rollBack();
+                $message = "¡No se pudo realizar la transacción, por favor intente de nuevo! Error: " . $e->getMessage();
+            }
+            
+        
+        }else{
+            $message="id actividad vacia";
         }
 
         // Send data by json to javascript ajax
@@ -256,7 +335,7 @@ class activityController extends Controller
         #clean all old cat and sub for this activity
         DB::table('tbactivity_subcategory')->where('id_activity', $idActivity)->delete();
         DB::table('tbactivity_category')->where('id_activity', $idActivity)->delete();
-        
+
         foreach ($infoArray as $item) {
             if(!preg_match('/[A-Za-z]/', $item) && preg_match('/[0-9]/', $item)){
                 #Contains only numbers
@@ -276,7 +355,9 @@ class activityController extends Controller
         return $flagInsert;
     }
     public function validateDate($date){
-        $today= date("Y-m-d");
+        $today = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
+        $today =date_format($today, 'Y-m-d');
+
         $dateCreate = date_create($date);
         $dateFormat =date_format($dateCreate, 'Y-m-d');
         $result=false;
@@ -342,6 +423,55 @@ class activityController extends Controller
         $arrayInfo = array("success"=>$success, "message"=>$message);
         echo json_encode($arrayInfo);
 
+    }
+
+            /**
+     * Receives the data of the FINISH ACTIVITY to update status into the database
+     */
+    public function finishActivity(Request $request)
+    {
+        $message = "Error";
+        $success = false;
+        $flagUpdate = false;
+        $idActivity = $request::get('idActivity');
+        $startTime = $request::get('startTime');
+
+        if ($idActivity != null && $startTime != null) {
+            DB::beginTransaction();
+            $currentHour = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
+            $currentHour = $currentHour->format("h:i:m");
+
+            $currentHour = new DateTime('NOW', new DateTimeZone("America/Costa_Rica"));
+            $currentHour =date_format($currentHour, "h:i:m");
+
+            $startTimeFormated = new DateTime($startTime, new DateTimeZone("America/Costa_Rica"));
+            $startTimeFormated =date_format($startTimeFormated, "h:i:m");
+
+
+            try {
+                $flagUpdate = DB::table('tbactivity')->where('id', $idActivity)->update(
+                    ['start_time' => $startTimeFormated, 'end_time' => $currentHour, 'status' => '0']);
+
+                if ($flagUpdate) {
+                    DB::commit();
+                    $success = true;
+                    $message = "Actividad finalizada con éxito";
+                } else {
+                    DB::rollBack();
+                    $message = "Error al actualizar en la base de datos";
+                }
+            } catch (Exception $e) {
+                DB::rollBack();
+                $success = false;
+                $message = "error".$e;
+            }
+        } else {
+            $message = "Error, no se pudo rescatar datos necesarios para finalizar.".$startTime."-".$idActivity;
+        }
+        // Send data by json to javascript ajax
+        $arrayInfo = array();
+        $arrayInfo = array("success" => $success, "message" => $message);
+        echo json_encode($arrayInfo);
     }
 
 }

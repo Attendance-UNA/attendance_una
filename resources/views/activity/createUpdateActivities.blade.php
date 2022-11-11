@@ -68,7 +68,7 @@
                     </div>
                     <div class="form-group" id="div-activityDate">
                         <label for="activityDate">Fecha de la actividad:</label>
-                        <input type="date" id="activityDate" name="activityDate" min="<?= date('Y-m-d'); ?>" required>
+                        <input type="date" id="activityDate" name="activityDate" min="<?= date('Y-m-d');?>" required>
                     </div>
                         <label for="categoryActivitySelect">Categor&iacute;as para incluir en esta actividad:</label>
                         <select id="categoryActivitySelect" class="custom-select">

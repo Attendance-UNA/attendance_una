@@ -57,10 +57,16 @@ Route::post('activities/getActivityStartedById', 'App\Http\Controllers\activityC
 //route for get Activity x id datas
 Route::post('activities/getActivityById', 'App\Http\Controllers\activityController@getActivityById');
 
+//route for get Activity x id datas
+Route::post('activities/getGuestsByActivityId', 'App\Http\Controllers\activityController@getGuestsByActivityId');
+
 //route for post activity insert  
 Route::post('activity/insert', [activityController::class, 'insertActivity']);
 //route for post activity update  
 Route::post('activity/update', [activityController::class, 'updateActivity']);
+
+//route for set finish activity   
+Route::post('activity/finish', [activityController::class, 'finishActivity']);
 // --------------------------END ACTIVITIES ROUTES-----------------------------------
 /**
  *  Section routes by subcategory

@@ -47,7 +47,9 @@ html {
     font-family: sans-serif;
     line-height: 1.15;
     -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0)
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    min-height: 100%;
+    position: relative;
 }
 
 article,
@@ -71,7 +73,7 @@ body {
     line-height: 1.5;
     color: #212529;
     text-align: left;
-    background-color: #fff
+    background-color: #fff;
 }
 
 [tabindex="-1"]:focus:not(:focus-visible) {
@@ -11117,7 +11119,7 @@ form .row:first-child .floating-label-form-group {
     padding-top: 5rem;
     padding-bottom: 5rem;
     background-color: #2c3e50;
-    color: #fff
+    color: #fff;
 }
 
 .copyright {

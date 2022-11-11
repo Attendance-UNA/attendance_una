@@ -129,7 +129,33 @@ function validateSubmit(flagAction) {
     }
     return false;
 }
+function getGuestsByActivityId(id){
 
+    var urlAction = "";
+    urlAction = "activities/getGuestsByActivityId";
+    var data = {idActivity: id};
+    
+    $.ajax({
+        type: "POST",
+        url: urlAction,
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        contentType: "application/json",
+        dataType: 'JSON',
+        data: JSON.stringify(data),
+        success: function(response){
+            if(response.success){
+                putCurrentGuests(response.currentGuests, response.currentPersons);
+
+            }else{
+                console.log("Lista de invitados vacia")
+            }
+        },
+        error: function() { 
+            console.log("¡Los sentimos, esta actividad contiene errores, intente de nuevo!")    
+            
+        }
+    });
+}
 function putCurrentGuests(guests,persons) {
     var table = document.querySelector("#table_list_guests");
     var stringTableBody = "";
@@ -173,15 +199,21 @@ function startActivityGetData(id){
                 document.getElementById('activityDescription').value=response[0].description; 
                 document.getElementById('activityManagerName').value=response[0].manager; 
                 document.getElementById('startDataTimeLbl').innerHTML="Fecha y hora de inicio: "+response[0].date+" / "+response[0].startTime; 
+                document.getElementById('activityStartTime').value=response[0].startTime;
+
+                getGuestsByActivityId(id);
             }else{
                 swal({
-                    title: "¡Los sentimos, esta actividad contiene errores, intente de nuevo!",
-                    text: "",
+                    title: "¡Esta actividad contiene errores!",
+                    text: "¡"+response[0].msj+"!",
                     icon: "error",
                     timer: 5000,
                     button: "Ok"
-                 });
-                window.location.replace("/");
+                 }).then(function() {
+                    
+                    window.location.replace("/createactivities");
+                    
+                });
             }
         },
         error: function() { 
@@ -193,13 +225,64 @@ function startActivityGetData(id){
                     button: "Ok"
                  }).then(function() {
                     
-                    window.location.replace("/");
+                    window.location.replace("/createactivities");
                     
                   });
             
             
         }
     });
+
+}
+function finishActivity(){
+    swal({
+        title: "Seguro que desea finalizar la actividad?",
+        text: "Al finalizar, no podrá ingresar más asistentes ni volver a iniciarla!",
+        icon: "warning",
+        buttons:  ["Cancelar", "Sí, Finalizar"],
+        dangerMode: true
+        
+      })
+      .then((willDelete) => {
+        // Activate animation loading send data
+        $(".loading").fadeIn();
+        if (willDelete) {
+            var urlAction = '';
+            var id_activity = document.getElementById('idActivity').value;
+            var start_time = document.getElementById('activityStartTime').value;
+            var data = {idActivity: id_activity, startTime: start_time };
+            urlAction = 'activity/finish';
+        
+            $.ajax({
+                type: "POST",
+                url: urlAction,
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                contentType: "application/json",
+                dataType: 'JSON',
+                data: JSON.stringify(data),
+                
+                success: function(response){
+                    if(response.success){
+                        $(".loading").fadeOut(1000);
+                        swal("¡"+response.message+"!","","success",{button: "Ok"});
+                        window.location.replace("/createactivities");
+                    
+                    }else{
+                        swal("¡No se pudo finalizar la actividad, intente nuevamente!","warning",{button: "Ok"});
+                        console.log(response.message);
+                        $(".loading").fadeOut(1000);
+                    }
+                },
+                error: function() { 
+                    $(".loading").fadeOut(1000);
+                    swal("¡Algo salió mal!","Recargue e intente de nuevo","error",{button: "Ok"}); 
+                }
+            });
+
+        } else {
+            $(".loading").fadeOut(1000);
+        }
+      });
 
 }
 
@@ -420,6 +503,7 @@ function submitDataActivity(flagAction) {
         }
     });
 }
+
 
 /**
  * Clear form fields after making a registration
@@ -669,9 +753,26 @@ function getCurrencyCategorySubcategoryList(){
     }
     return idCategoriesSubcategoriesList;
 }
+function setMinDate(){
+    // Use Javascript
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0 so need to add 1 to make it 1!
+    var yyyy = today.getFullYear();
+    if(dd<10){
+    dd='0'+dd
+    } 
+    if(mm<10){
+    mm='0'+mm
+    } 
+
+    today = yyyy+'-'+mm+'-'+dd;
+    document.getElementById("activityDate").setAttribute("min", today);
+}
 function initializerEventListenerCreateActivity() {
     //if the page is ready we can fade out the loading
     $(document).ready(function () {
+        setMinDate();
         uploadSubCategoryList();
         getAllActivities();
         //Loading animation control
