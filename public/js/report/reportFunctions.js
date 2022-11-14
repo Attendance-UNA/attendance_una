@@ -1,12 +1,4 @@
 /**
- * Contains the regular expressions to use in form validations
- */
- const reportExpression = {
-    nameActivity: /^[a-zA-ZÀ-ÿ0-9\s,]{1,99}$/,
-    justLetters: /^[a-zA-ZÀ-ÿ0-9]$/,
-}
-
-/**
  * It is aware of what happens with the form fields
  */
  function initializerEventListenerReport () {
@@ -115,10 +107,8 @@ function filterTableNameActivity() {
                     swal(response.message,"","warning",{button: "Ok"});
                 }
             },
-            error: function() { 
-                //document.getElementById('loadingBySub').hidden = true;
-                //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
-                console.log('Algo esta fallando en seccion nombre actividad');
+            error: function() {
+                swal("¡Algo salió mal!","Fallo en tabla nombre actividad [1]","error",{button: "Ok"});
             }
         });
     }else{
@@ -155,7 +145,6 @@ function createTableDataActivityName(dataActivityNames) {
 function filterReportNameActivity (idActivity, nameActivity) {
     // Activate animation loading send data
     document.getElementById('loadingByRep').hidden = false;
-
     const formData = new FormData();        
     formData.append('idActivity', idActivity); // Store the data to send it to controller
 
@@ -168,17 +157,13 @@ function filterReportNameActivity (idActivity, nameActivity) {
         processData: false,
         dataType: 'JSON',
         success: function(response){
-            if(response.success){
-                // Once it obtains the data, it sends them to print the report
-                printReportNameActivity(response.data, response.activityData, nameActivity);
-            }else{
-                document.getElementById('loadingByRep').hidden = true;
-                swal(response.message,"Verifique que el nombre este bien escrito","warning",{button: "Ok"});
-            }
+            // Once it obtains the data, it sends them to print the report
+            document.getElementById('loadingByRep').hidden = true;
+            printReportNameActivity(response.data, response.activityData, nameActivity);
         },
         error: function() {
-            document.getElementById('loadingByRep').hidden = true; 
-            console.log('Error en reporte nombre actividad');
+            document.getElementById('loadingByRep').hidden = true;
+            swal("¡Algo salió mal!","Fallo al obtener datos por nombre actividad [2]","error",{button: "Ok"});
         }
     });
 }
@@ -213,7 +198,7 @@ function filterReportNameActivity (idActivity, nameActivity) {
         },
         error: function(){
             document.getElementById('loadingByRep').hidden = true;
-            console.log('Error al generar reporte por nombre actividad');
+            swal("¡Algo salió mal!","Fallo al imprimir reporte por nombre actividad [3]","error",{button: "Ok"});
         }
     });
 }
@@ -249,7 +234,7 @@ function filterReportDate() {
             },
             error: function() {
                 document.getElementById('loadingByRep').hidden = true;
-                console.log('Error en reporte por fecha');
+                swal("¡Algo salió mal!","Fallo al obtener datos por fecha [1]","error",{button: "Ok"});
             }
         });
 
@@ -288,7 +273,7 @@ function printReportDate(attendanceData, date) {
         },
         error: function(){
             document.getElementById('loadingByRep').hidden = true;
-            console.log('Error al generar reporte por fecha');
+            swal("¡Algo salió mal!","Fallo al imprimir reporte por fecha [2]","error",{button: "Ok"});
         }
     });
 }
@@ -324,7 +309,7 @@ function filterReportIdPerson() {
             },
             error: function() { 
                 document.getElementById('loadingByRep').hidden = true;
-                console.log('Error en reporte cedula persona');
+                swal("¡Algo salió mal!","Fallo al obtener datos por cédula persona [1]","error",{button: "Ok"});
             }
         });
 
@@ -363,7 +348,7 @@ function printReportPerson(personData, attendanceData) {
         },
         error: function(){
             document.getElementById('loadingByRep').hidden = true;
-            console.log('Error al generar reporte por persona');
+            swal("¡Algo salió mal!","Fallo al imprimir reporte por persona [2]","error",{button: "Ok"});
         }
     });
 }
@@ -400,10 +385,8 @@ function filterTablePersonName() {
                     swal(response.message,"","warning",{button: "Ok"});
                 }
             },
-            error: function() { 
-                //document.getElementById('loadingBySub').hidden = true;
-                //swal("¡Algo salió mal!","No existe actividad con el nombre ingresado","warning",{button: "Ok"}); 
-                console.log('Algo esta fallando en seccion nombre persona');
+            error: function() {
+                swal("¡Algo salió mal!","Fallo en tabla nombre persona [1]","error",{button: "Ok"});
             }
         });
         
@@ -455,17 +438,14 @@ function filterReportNamePerson(idPerson) {
         processData: false,
         dataType: 'JSON',
         success: function(response){
-            if(response.success){
-                // Once it obtains the data, it sends them to print the report
-                printReportPerson(response.person, response.attendance);
-            }else{
-                document.getElementById('loadingByRep').hidden = true;
-                swal(response.message,"","warning",{button: "Ok"});
-            }
+            // Once it obtains the data, it sends them to print the report
+            document.getElementById('loadingByRep').hidden = true;
+            printReportPerson(response.person, response.attendance);
+            
         },
         error: function() { 
             document.getElementById('loadingByRep').hidden = true; 
-            console.log('Algo esta fallando en seccion cedula persona');
+            swal("¡Algo salió mal!","Fallo al obtener datos por nombre persona [2]","error",{button: "Ok"});
         }
     });
 }

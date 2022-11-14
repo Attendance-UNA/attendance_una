@@ -42,11 +42,11 @@ class reportController extends Controller
         // Get the date provided by the ajax
         $nameActivity = $request::get('nameActivity');
 
-        $namesActivities = DB::table('tbactivity')->where('name', $nameActivity)->get();
+        $namesActivities = DB::table('tbactivity')->where([['name', 'like', '%'.$nameActivity.'%'],['status', 0]])->get();
 
         if(sizeof($namesActivities) == 0){
             $success = false;
-            $message = 'No existen actividades regitradas con el nombre ingresado';
+            $message = 'No se encuentra una actividad finalizada por el nombre ingresado';
         }
 
         // Send data by json to javascript ajax
@@ -59,93 +59,84 @@ class reportController extends Controller
      * Gets the necessary information from the activity name
      */
     public function requestDataNameActivity(Request $request) {
-        $message = '';
-        $success = false;
         $idActivity = $request::get('idActivity'); // Get the activity name provided by the ajax
 
         $attendance = '';
         $activityData  = '';
         $listPersonsCategory = '';
-        $arrayPersonsCategory = array();
         $finalArrayAttendance= array();
+        $arrayPersonsCategory = array();
         
         // Extract the data of the queried activity
-        $activity = DB::table('tbactivity')->where('id', $idActivity)->get();
+        $activity = DB::table('tbactivity')->where([['id', $idActivity],['status', 0]])->get();
+
+        $activity = $activity[0]; // Take the first element (activity) of the array
+
+        // Stores activity data
+        $activityData = new stdClass();
+        $activityData->date = $activity->date;
+        $activityData->manager = $activity->manager;
+        $activityData->nameAcvivity = $activity->name;
+        $activityData->end_time = $activity->end_time;
+        $activityData->start_time = $activity->start_time;
+
+        // Extract the categories related to the queried activity
+        $activityCategories = DB::table('tbactivity_category')->where('id_activity', $activity->id)
+        ->pluck('category');
         
-        if(sizeof($activity) != 0) { // Continue if query contains data
+        foreach ($activityCategories as $category) {
+            /**
+             * Extract the people that belong to a search category and
+             * that are active within the system
+             */
+            $listPersonsCategory = DB::table('tbperson')->where('category', $category)->get();
+            array_push($arrayPersonsCategory, $listPersonsCategory); // Save the data of each query
+        }
 
-            $activity = $activity[0]; // Take the first element (activity) of the array
-
-            // Stores activity data
-            $activityData = new stdClass();
-            $activityData->date = $activity->date;
-            $activityData->manager = $activity->manager;
-            $activityData->nameAcvivity = $activity->name;
-            $activityData->end_time = $activity->end_time;
-            $activityData->start_time = $activity->start_time;
-
-            // Extract the categories related to the queried activity
-            $activityCategories = DB::table('tbactivity_category')->where('id_activity', $activity->id)
-            ->pluck('category');
-            
-            foreach ($activityCategories as $category) {
+        foreach ($arrayPersonsCategory as $groupPersonCategories) {
+            /**
+             * Browse the people who relate to the category
+             */
+            foreach ($groupPersonCategories as $person) {
                 /**
-                 * Extract the people that belong to a search category and
-                 * that are active within the system
+                 * Search the relationship of people with the consulted activity
                  */
-                $listPersonsCategory = DB::table('tbperson')->where('category', $category)->get();
-                array_push($arrayPersonsCategory, $listPersonsCategory); // Save the data of each query
-            }
-    
-            foreach ($arrayPersonsCategory as $groupPersonCategories) {
-                /**
-                 * Browse the people who relate to the category
-                 */
-                foreach ($groupPersonCategories as $person) {
+                $attendance = DB::table('tbactivity_person')
+                ->where([['id_activity', $activity->id], ['id_person', $person->id]])->get();
+
+                // Personal data is stored
+                $activityInfoPackage = new stdClass();
+                $activityInfoPackage->name = $person->name;
+                $activityInfoPackage->category = $person->category;
+                $activityInfoPackage->first_lastname = $person->first_lastname;
+                $activityInfoPackage->second_lastname = $person->second_lastname;
+
+                // The person's attendance data is stored
+                if(sizeof($attendance) != 0){
                     /**
-                     * Search the relationship of people with the consulted activity
+                     * It is recognized that he did attend
                      */
-                    $attendance = DB::table('tbactivity_person')
-                    ->where([['id_activity', $activity->id], ['id_person', $person->id]])->get();
-
-                    // Personal data is stored
-                    $activityInfoPackage = new stdClass();
-                    $activityInfoPackage->name = $person->name;
-                    $activityInfoPackage->category = $person->category;
-                    $activityInfoPackage->first_lastname = $person->first_lastname;
-                    $activityInfoPackage->second_lastname = $person->second_lastname;
-
-                    // The person's attendance data is stored
-                    if(sizeof($attendance) != 0){
-                        /**
-                         * It is recognized that he did attend
-                         */
-                        $activityInfoPackage->present = 'Si';
-                        $activityInfoPackage->entry_hour = $attendance[0]->entry_hour;
-                    }else{
-                        /**
-                         * It is recognized that he was absent
-                         */
-                        $activityInfoPackage->present = 'No';
-                        $activityInfoPackage->entry_hour = '00:00:00';
-                    }
-
+                    $activityInfoPackage->present = 'Si';
+                    $activityInfoPackage->entry_hour = $attendance[0]->entry_hour;
+                }else{
                     /**
-                     * Packaging of data to send to the report design
+                     * It is recognized that he was absent
                      */
-                    $arrayAux = array("activityInfoPackage" => $activityInfoPackage);
-                    array_push($finalArrayAttendance, $arrayAux);
+                    $activityInfoPackage->present = 'No';
+                    $activityInfoPackage->entry_hour = '00:00:00';
                 }
+
+                /**
+                 * Packaging of data to send to the report design
+                 */
+                $arrayAux = array("activityInfoPackage" => $activityInfoPackage);
+                array_push($finalArrayAttendance, $arrayAux);
             }
-            $success = true; // Confirms that the entered activity did exist
-        }else{
-            $message = 'Actividad no encontrada por el nombre ingresado';
         }
 
         // Send data by json to javascript ajax
         $arrayInfo = array();
-        $arrayInfo = array("data" => $finalArrayAttendance, "activityData" => $activityData,
-        "message" => $message, "success" => $success);
+        $arrayInfo = array("data" => $finalArrayAttendance, "activityData" => $activityData);
         echo json_encode($arrayInfo);
     }
 
@@ -169,9 +160,9 @@ class reportController extends Controller
      * Obtains the necessary attendance information on a date
      */
     public function requestDataDate(Request $request) {
+        $date = $request::get('date'); // Get the date provided by the ajax
         $message = '';
         $success = false;
-        $date = $request::get('date'); // Get the date provided by the ajax
 
         $attendance = '';
         $listPersonsCategory = '';
@@ -179,7 +170,7 @@ class reportController extends Controller
         $finalArrayAttendance= array();
 
         // Extract the activities that match the entered date
-        $activities = DB::table('tbactivity')->where('date', $date)->get();
+        $activities = DB::table('tbactivity')->where([['date', $date],['status', 0]])->get();
 
         if(sizeof($activities) != 0) { // Continue if query contains data
             foreach($activities as $activity) {
@@ -236,7 +227,7 @@ class reportController extends Controller
             }
             $success = true; // Confirms that the entered activity did exist
         }else{
-            $message = 'No hay actividades por la fecha ingresada';
+            $message = 'No hay actividades finalizadas por la fecha ingresada';
         }
 
         // Send data by json to javascript ajax
@@ -265,9 +256,9 @@ class reportController extends Controller
      * Obtains the necessary data for the filtered person
      */
     public function requestDataPerson(Request $request) {
+        $idPerson = $request::get('idPerson'); // Get the date provided by the ajax
         $message = '';
         $success = false;
-        $idPerson = $request::get('idPerson'); // Get the date provided by the ajax
 
         $activityData = '';
         $personData = '';
@@ -294,42 +285,37 @@ class reportController extends Controller
             foreach($activityCategory as $auxAct) {
 
                 // The general data of the activity is extracted
-                $activity = DB::table('tbactivity')->where('id', $auxAct->id_activity)->get();
+                $activity = DB::table('tbactivity')->where([['id', $auxAct->id_activity],['status', 0]])->get();
 
                 foreach($activity as $aux) {
                     // Relations of activities and assistance of person are extracted
-                    $activityPerson = DB::table('tbactivity_person')->where('id_activity', $aux->id)->get();
+                    $activityPerson = DB::table('tbactivity_person')->where([['id_activity', $aux->id],['id_person', $idPerson]])->get();
 
-                    if(sizeof($activityPerson) != 0){ // Si fue iniciada antes
+                    // Datos relacionados a la actividad
+                    $activityData = new stdClass();
+                    $activityData->name = $aux->name;
+                    $activityData->date = $aux->date;
+                    $activityData->manager = $aux->manager;
 
-                        // Datos relacionados a la actividad
-                        $activityData = new stdClass();
-                        $activityData->name = $aux->name;
-                        $activityData->date = $aux->date;
-                        $activityData->manager = $aux->manager;
-
-                        foreach($activityPerson as $aux2){
-                            if($aux2->id_person == $idPerson){
-                                /**
-                                 * It is recognized that he did attend
-                                 */
-                                $activityData->entry_hour = $aux2->entry_hour;
-                                $activityData->present = 'Si';
-                            }else{
-                                /**
-                                 * It is recognized that he was absent
-                                 */
-                                $activityData->entry_hour = '00:00:00';
-                                $activityData->present = 'No';
-                            }
-                        }
-    
+                    if(sizeof($activityPerson) != 0) {
                         /**
-                         * Packaging of data to send to the report design
+                         * It is recognized that he did attend
                          */
-                        $arrayAux = array("activityInfoPackage" => $activityData);
-                        array_push($packArrayActivity, $arrayAux);
+                        $activityData->entry_hour = $activityPerson[0]->entry_hour;
+                        $activityData->present = 'Si';
+                    }else{
+                        /**
+                         * It is recognized that he was absent
+                         */
+                        $activityData->entry_hour = '00:00:00';
+                        $activityData->present = 'No';
                     }
+
+                    /**
+                     * Packaging of data to send to the report design
+                     */
+                    $arrayAux = array("activityInfoPackage" => $activityData);
+                    array_push($packArrayActivity, $arrayAux);
                 }
             }
             $success = true;
