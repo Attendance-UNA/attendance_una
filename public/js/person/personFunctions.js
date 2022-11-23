@@ -39,31 +39,6 @@ function submitDataPerson(){
     return false;
 }
 
-function downloadTemplate(){
-    var urlAction = 'person/download_template';
-    $.ajax({
-        type: "GET",
-        url: urlAction,
-        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-        data: null,
-        contentType: false,
-        processData: false,
-        success: function(response){
-            document.getElementById('div-loading').classList.add('d-none');
-            if(response.messageType == "success"){
-                
-            }else{
-                swal("¡Error!",response.message,"error",{button: "Ok"});
-            }
-        },
-        error: function(e) {
-            console.log(e); 
-            document.getElementById('div-loading').classList.add('d-none');
-            swal("¡Algo salió mal!","Recargue e intente de nuevo ","error",{button: "Ok"}); 
-        }
-    });
-}
-
 function initializerImportPersonModal(){
     document.getElementById('personSection').addEventListener("click", function(){
         document.getElementById('formUploadPerson').reset();

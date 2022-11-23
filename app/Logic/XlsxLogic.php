@@ -2,6 +2,7 @@
 
 namespace App\Logic;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\Person;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as ReaderXlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -39,7 +40,6 @@ class XlsxLogic{
 
     public function writeSubcategories($rowBegin, $columns, $subcategories){
         $success = true;
-        $errorMessage = "";
         $styleArray = [
             'borders' => [
                 'allBorders' => [
@@ -68,14 +68,15 @@ class XlsxLogic{
             $writer->save($this->path);
         }catch(\Exception $e){
             $success = false;
-            $errorMessage = $e->getMessage();
+            DB::table('tblog')->insert([
+                'error_message' => $e->getMeesage(),
+            ]);
         }
-        return ["success"=>$success, "error"=>$errorMessage];
+        return ["success"=>$success];
     }
 
     public function writeCategories($rowBegin, $column, $categories){
         $success = true;
-        $errorMessage = "";
         try{
             $this->spreadsheet->setActiveSheetIndex(0);
             XlsxLogic::setSheet($this->spreadsheet->getActiveSheet());
@@ -97,9 +98,11 @@ class XlsxLogic{
             $writer->save($this->path);
         }catch (\Exception $e){
             $success = false;
-            $errorMessage = $e->getMessage();
+            DB::table('tblog')->insert([
+                'error_message' => $e->getMeesage(),
+            ]);
         }
-        return ["success"=>$success, "errorMessage"=>$errorMessage];
+        return ["success"=>$success];
     }
 
     public function checkRequiredColumns($rowBegin, $requiredColumns){
