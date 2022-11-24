@@ -24,6 +24,8 @@ class uploadPersonController extends Controller
         $result = $xlsxLogic->writeSubcategories(3, ["A", "B", "C", "D"], $subcategories);
         if ($result["success"] && $resultCategories["success"]){
             return response()->download('files/xlsx/Plantilla_Invitados.xlsx');
+        }else{
+            return redirect('/')->with('error', '¡Error en la descarga de la plantilla, por favor intente de nuevo!');
         }
     }
 
@@ -88,7 +90,10 @@ class uploadPersonController extends Controller
                             }catch(\Exception $e){
                                 DB::rollBack();
                                 $messageType = "error";
-                                $message = "¡No se pudo realizar la transacción, por favor intente de nuevo! Error: " . $e->getMessage();
+                                $message = "¡No se pudo realizar la transacción debido a un errorn en la base de datos, por favor intente de nuevo!";
+                                DB::table('tblog')->insert([
+                                    'error_message' => $e->getMeesage(),
+                                ]);
                             }
                         }else{
                             $message = "Se encontraron algunos errores en los datos del archivo: \n\n" . implode("\n\n", array_unique($errors));

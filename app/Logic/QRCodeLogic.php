@@ -17,7 +17,7 @@ class QRCodeLogic{
         foreach ($people as $person){
             $section = $phpWord->addSection();
             $section->addText(
-                $person->id,
+                $person->id . " - " . $person->name . " ". $person->firstLastName . " ". $person->secondLastName,
                 array('name' => 'Arial', 'size' => 12)
             );
             $section->addTextBreak(1);

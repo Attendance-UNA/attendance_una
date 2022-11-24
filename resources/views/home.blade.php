@@ -35,6 +35,14 @@
             <p class="pre-wrap masthead-subheading font-weight-light mb-0">Registro de invitados - Control de asistencias - Reportes </p>
         </div>
     </header>
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>{{ session('error') }}</strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
     <section class="page-section portfolio" id="newActivity">
         <div class="container">
             <!-- newActivity Section Heading-->

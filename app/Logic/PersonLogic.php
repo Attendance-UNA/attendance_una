@@ -54,7 +54,7 @@ class PersonLogic
     public function validateDataPeople($people, $dbCategories, $dbSubcategories){
         $errors = [];
         foreach ($people as $person){
-            (PersonLogic::validateStringData($person->id, "/^[0-9]{9}$/") || PersonLogic::validateStringData($person->id, "/^[0-9]{12}$/"))?null:$errors[] = "La cédula debe contener solo números. Entre 9 y 12 caracteres";       
+            (PersonLogic::validateStringData($person->id, "/^[0-9]{9}$/") || PersonLogic::validateStringData($person->id, "/^[A-Za-z0-9]{13}$/"))?null:$errors[] = "La cédula debe contener solo números. Entre 9 y 13 caracteres";       
             (PersonLogic::validateStringData($person->name,"/^[a-zA-ZÀ-ÿ]{1,49}$/"))?null:$errors[] = "El nombre debe contener solo letras. Máximo 50 caracteres"; 
             (PersonLogic::validateStringData($person->firstLastName, "/^[a-zA-ZÀ-ÿ]{1,49}$/"))?null:$errors[] = "El apellido 1 debe contener solo letras. Máximo 50 caracteres"; 
             (PersonLogic::validateStringData($person->secondLastName, "/^[a-zA-ZÀ-ÿ]{1,49}$/"))?null:$errors[] = "El apellido 2 debe contener solo letras. Máximo 50 caracteres"; 
