@@ -213,6 +213,25 @@ class activityController extends Controller
 
         return $success;
     }
+    public function validateActivityName($activityName,$activityDate){
+        //response
+        $success=true;
+        $dateScheduled = date_create($activityDate);
+        $date =date_format($dateScheduled, 'Y-m-d');
+        //get only activity name if is the same
+        $sameNameActivity= DB::table('tbactivity')->where('name','LIKE',$activityName)->get();
+        
+        if($sameNameActivity!=null){
+            //validate category
+            foreach ($sameNameActivity as $sameActivityDate) {
+                //if have a same name and same date is false
+                if($date==$sameActivityDate->date){
+                    $success=false;
+                }
+            }
+        }
+        return $success;
+    }
 
     //get guests by an activity
     public function getGuestsByActivityId(Request $request){
@@ -325,31 +344,35 @@ class activityController extends Controller
         if($activityName!=null&&$activityDescription!=null&&$activityManagername!=null&&$activityDate!=null){
         if($categorySubcategoryList!=null){
             if($this->validateDate($activityDate)){
-                DB::beginTransaction();
-                $idActivity = DB::table('tbactivity')->insertGetId(
-                    ['name' => $activityName, 'date' => $activityDate,'description' => $activityDescription,'manager' => $activityManagername,'status' => 1]
-                );
-                
-                if($idActivity!=null){
-                    DB::commit();
-                    try {
-                        $flagInsert =$this->insertCategoriesAndSubcategories($idActivity,$categorySubcategoryList);
-                    } catch (Exception $e) {
+
+                if($this->validateActivityName($activityName,$activityDate)){
+                    DB::beginTransaction();
+                    $idActivity = DB::table('tbactivity')->insertGetId(
+                        ['name' => $activityName, 'date' => $activityDate,'description' => $activityDescription,'manager' => $activityManagername,'status' => 1]
+                    );
+                    
+                    if($idActivity!=null){
+                        DB::commit();
+                        try {
+                            $flagInsert =$this->insertCategoriesAndSubcategories($idActivity,$categorySubcategoryList);
+                        } catch (Exception $e) {
+                            DB::rollBack();
+                            DB::table('tbactivity')->where('id', $idActivity)->delete();
+                            $success = false;
+                            $message =$e;
+                        } 
+                    }
+                    if($flagInsert){
+                        $success = true;
+                        $message = "Actividad registrada con éxito";
+                    }else{
                         DB::rollBack();
                         DB::table('tbactivity')->where('id', $idActivity)->delete();
-                        $success = false;
-                        $message =$e;
-                    } 
-                }
-                if($flagInsert){
-                    $success = true;
-                    $message = "Actividad registrada con éxito";
+                        $message ="Error al registrar en la base de datos";
+                    }
                 }else{
-                    DB::rollBack();
-                    DB::table('tbactivity')->where('id', $idActivity)->delete();
-                    $message ="Error al registrar en la base de datos";
+                    $message = "Error, ya existe esa actividad en la fecha seleccionada";
                 }
-
             }else{
                 $message = "Error en la fecha, no puede ser anterior al día actual";
             }
@@ -423,27 +446,28 @@ class activityController extends Controller
         if($activityName!=null&&$activityDescription!=null&&$activityManagername!=null&&$activityDate!=null){
         if($categorySubcategoryList!=null){
             if($this->validateDate($activityDate)){
-                DB::beginTransaction();
-                $flagUpdate = DB::table('tbactivity')->where('id', $idActivity)->update(
-                    ['date' => $activityDate,'description' => $activityDescription,'manager' => $activityManagername,'status' => 1]
-                );
-                
-                try {
-                    $flagUpdate =$this->insertCategoriesAndSubcategories($idActivity,$categorySubcategoryList);
-                } catch (Exception $e) {
-                    DB::rollBack();
-                    $success = false;
-                    $message =$e;
-                } 
-                
-                if($flagUpdate){
-                    DB::commit();
-                    $success = true;
-                    $message = "Actividad actualizada con éxito";
-                }else{
-                    DB::rollBack();
-                    $message ="Error al actualizar en la base de datos";
-                }
+
+                    DB::beginTransaction();
+                    $flagUpdate = DB::table('tbactivity')->where('id', $idActivity)->update(
+                        ['date' => $activityDate,'description' => $activityDescription,'manager' => $activityManagername,'status' => 1]
+                    );
+                    
+                    try {
+                        $flagUpdate =$this->insertCategoriesAndSubcategories($idActivity,$categorySubcategoryList);
+                    } catch (Exception $e) {
+                        DB::rollBack();
+                        $success = false;
+                        $message =$e;
+                    } 
+                    
+                    if($flagUpdate){
+                        DB::commit();
+                        $success = true;
+                        $message = "Actividad actualizada con éxito";
+                    }else{
+                        DB::rollBack();
+                        $message ="Error al actualizar en la base de datos";
+                    }
 
             }else{
                 $message = "Error en la fecha, no puede ser anterior al día actual";
