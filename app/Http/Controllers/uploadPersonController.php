@@ -92,7 +92,7 @@ class uploadPersonController extends Controller
                                 $messageType = "error";
                                 $message = "¡No se pudo realizar la transacción debido a un errorn en la base de datos, por favor intente de nuevo!";
                                 DB::table('tblog')->insert([
-                                    'error_message' => $e->getMeesage(),
+                                    'error_message' => $e->getMessage(),
                                 ]);
                             }
                         }else{
