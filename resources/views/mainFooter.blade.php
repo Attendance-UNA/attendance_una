@@ -16,7 +16,7 @@
                     <!-- Footer About Text-->
                     <div class="col-lg-4">
                         <h4 class="mb-4">Acerca de AttendanceUNA</h4>
-                        <p class="pre-wrap lead mb-0">AttendanceUNA es la aplicaci&oacuten web ideal para llevar el control de asistencia en actividades organizadas en el camp&uacutes Sarapiqu&iacute de la Universidad Nacional de Costa Rica.</p>
+                        <p class="pre-wrap lead mb-0">AttendanceUNA es la aplicaci&oacuten web ideal para llevar el control de asistencia en la Universidad Nacional de Costa Rica.</p>
                     </div>
                 </div>
             </div>
